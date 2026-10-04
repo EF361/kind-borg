@@ -161,7 +161,7 @@ async function recordSpec(browser, spec, outputDir) {
   // Step 1: Desktop Split-Panel & Sticky Settings Sidebar
   await setBadge('Desktop Split-Panel & Sticky Settings Sidebar');
   await glideCursorTo(Math.min(width - 150, Math.round(width * 0.75)), Math.round(height * 0.35), 4);
-  await settle(3);
+  await settle(5, 480);
 
   // Step 2: Quick One-Tap Generate
   await setBadge('Quick One-Tap Generation');
@@ -172,7 +172,7 @@ async function recordSpec(browser, spec, outputDir) {
       await glideCursorTo(Math.round(box.x + box.width / 2), Math.round(box.y + box.height / 2), 4);
       await clickWithRipple();
       await genBtn.click();
-      await settle(4);
+      await settle(5, 480);
     }
   }
 
@@ -185,7 +185,7 @@ async function recordSpec(browser, spec, outputDir) {
       await glideCursorTo(Math.round(box.x + box.width / 2), Math.round(box.y + box.height / 2), 4);
       await clickWithRipple();
       await passBtn.click();
-      await settle(4);
+      await settle(6, 500);
     }
   }
 
@@ -198,13 +198,13 @@ async function recordSpec(browser, spec, outputDir) {
       await glideCursorTo(Math.round(box.x + box.width / 2), Math.round(box.y + box.height / 2), 4);
       await clickWithRipple();
       await qrBtn.click();
-      await settle(4);
+      await settle(5, 480);
     }
   }
 
   // Step 5: Switch Viewport to Mobile
   await page.setViewportSize({ width: mobileW, height: mobileH });
-  await page.waitForTimeout(400);
+  await page.waitForTimeout(500);
   await injectOverlay(page);
   await setBadge('Mobile Viewport: Sticky Thumb-Reach Action Bar');
   currentCursor = { x: Math.round(mobileW / 2), y: Math.round(mobileH * 0.6) };
@@ -216,7 +216,7 @@ async function recordSpec(browser, spec, outputDir) {
       await glideCursorTo(Math.round(box.x + box.width / 2), Math.round(box.y + box.height / 2), 4);
       await clickWithRipple();
       await mobileGen.click();
-      await settle(4);
+      await settle(6, 500);
     }
   }
 
@@ -230,11 +230,21 @@ async function recordSpec(browser, spec, outputDir) {
 
   await context.close();
 
+  // Duration calibration: normalize frame delays to exactly 17.5s (17500ms)
+  const targetDurationMs = 17500;
+  const rawTotalMs = frames.reduce((a, b) => a + (b.delay || 100), 0);
+  const timeScale = targetDurationMs / rawTotalMs;
+  frames.forEach(f => {
+    f.delay = Math.max(60, Math.round((f.delay || 100) * timeScale));
+  });
+
+  const finalDurationSec = (frames.reduce((a, b) => a + (b.delay || 100), 0) / 1000).toFixed(1);
+
   // Encode GIF with rgb565 high fidelity
-  console.log(`Encoding GIF: ${gifName}...`);
+  console.log(`Encoding GIF: ${gifName} (Target: ${finalDurationSec}s runtime)...`);
   const finalGifPath = path.join(outputDir, gifName);
   const gifRes = await encodeGifFromPngFrames(frames, finalGifPath, width, height, 'crop');
-  console.log(`GIF saved: ${gifName} (${(gifRes.size / 1024 / 1024).toFixed(2)} MB, ${gifRes.frameCount} frames)`);
+  console.log(`GIF saved: ${gifName} (${(gifRes.size / 1024 / 1024).toFixed(2)} MB, ${gifRes.frameCount} frames, ${finalDurationSec}s runtime)`);
 
   return { gifRes, videoPath: finalVideoPath };
 }

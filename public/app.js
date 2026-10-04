@@ -122,10 +122,11 @@ document.addEventListener('DOMContentLoaded', () => {
       presetExample1.classList.add('active');
       if (presetExample2) presetExample2.classList.remove('active');
       targetUrlInput.value = 'https://intelligent-curie-alpha.vercel.app/';
-      instructionsInput.value = `Quick one-tap generation on Desktop showing the split-panel with the sticky settings sidebar.
-Toggling into Passphrase mode (showing words like correct-horse-battery-staple).
-Clicking the QR Code button and showing the SVG modal open.
-Switching the viewport to Mobile to highlight the sticky thumb-reach action bar at the bottom.`;
+      instructionsInput.value = `1. Inspect Desktop Split-Panel & Sticky Settings Sidebar: Real-time cryptographic entropy display (~105 bits) and live sync parameters.
+2. Quick One-Tap Generation: Trigger single-click regeneration with cursor glide, click ripple, and real-time strength re-calculation.
+3. Passphrase Mode: Toggle into dictionary passphrase mode showing memorable hyphenated words (e.g. correct-horse-battery-staple) and word count adjustments.
+4. Vector QR Code SVG Modal: Open air-gapped QR code modal for secure instant camera transfer to another device.
+5. Mobile Responsive Viewport: Switch to mobile viewport highlighting the sticky thumb-reach bottom action bar ([Generate] & [Copy]).`;
       fetchPlan();
     });
   }
