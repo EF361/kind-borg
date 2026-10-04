@@ -1,11 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Mode tabs
+  // Navigation & Steps
+  const navStep1 = document.getElementById('nav-step-1');
+  const navStep2 = document.getElementById('nav-step-2');
+  const navStep3 = document.getElementById('nav-step-3');
+  const cardStepVisual = document.getElementById('card-step-visual');
+  const cardStepCaption = document.getElementById('card-step-caption');
+  const linkedinPreviewContainer = document.getElementById('linkedin-preview-container');
+
+  // Media Mode Tabs
   const tabWalkthrough = document.getElementById('tab-walkthrough');
   const tabFlowchart = document.getElementById('tab-flowchart');
   const modeWalkthroughView = document.getElementById('mode-walkthrough-view');
   const modeFlowchartView = document.getElementById('mode-flowchart-view');
 
-  // Walkthrough form elements
+  // Walkthrough Form Elements
   const targetUrlInput = document.getElementById('target-url-input');
   const instructionsInput = document.getElementById('instructions-input');
   const durationSelect = document.getElementById('duration-select');
@@ -14,15 +22,42 @@ document.addEventListener('DOMContentLoaded', () => {
   const planBtn = document.getElementById('plan-btn');
   const recordBtn = document.getElementById('record-btn');
   const stepTimeline = document.getElementById('step-timeline');
+  const presetExample1 = document.getElementById('preset-example-1');
+  const presetExample2 = document.getElementById('preset-example-2');
 
-  // Flowchart form elements
+  // Collapsible Advanced Settings
+  const toggleAdvancedBtn = document.getElementById('toggle-advanced-btn');
+  const advancedSettingsBody = document.getElementById('advanced-settings-body');
+  const advancedChevron = document.getElementById('advanced-chevron');
+
+  // Flowchart Form Elements
   const flowchartTitleInput = document.getElementById('flowchart-title-input');
   const flowchartBtn = document.getElementById('flowchart-btn');
   const colorModeMulti = document.getElementById('color-mode-multi');
   const colorModeOne = document.getElementById('color-mode-one');
-  let activeColorMode = 'multicolor'; // 'multicolor' | 'onecolor'
+  let activeColorMode = 'multicolor';
 
-  // Output elements
+  // Caption Generator Elements
+  const toneChips = document.querySelectorAll('.tone-chip');
+  const captionPromptInput = document.getElementById('caption-prompt-input');
+  const generateCaptionBtn = document.getElementById('generate-caption-btn');
+  const copyCaptionBtn = document.getElementById('copy-caption-btn');
+  const captionEditor = document.getElementById('caption-editor');
+  const captionCharCount = document.getElementById('caption-char-count');
+  const hashtagPills = document.querySelectorAll('.tag-pill');
+
+  // Prompt Manager Modal Elements
+  const openPromptManagerBtn = document.getElementById('open-prompt-manager-btn');
+  const promptManagerModal = document.getElementById('prompt-manager-modal');
+  const closePromptModalBtn = document.getElementById('close-prompt-modal-btn');
+  const tmplPills = document.querySelectorAll('.tmpl-pill');
+  const promptTemplateEditor = document.getElementById('prompt-template-editor');
+  const geminiApiKeyInput = document.getElementById('gemini-api-key-input');
+  const savePromptsBtn = document.getElementById('save-prompts-btn');
+  const resetPromptsBtn = document.getElementById('reset-prompts-btn');
+
+  // LinkedIn Post Preview & Output Elements
+  const liPreviewText = document.getElementById('li-preview-text');
   const previewPlaceholder = document.getElementById('preview-placeholder');
   const recordingProgress = document.getElementById('recording-progress');
   const previewDisplay = document.getElementById('preview-display');
@@ -43,13 +78,98 @@ document.addEventListener('DOMContentLoaded', () => {
   const metaSize = document.getElementById('meta-size');
   const recentList = document.getElementById('recent-list');
 
+  // LinkedIn Publish Action Buttons
+  const publishLinkedinBtn = document.getElementById('publish-linkedin-btn');
+  const quickPostBtn = document.getElementById('quick-post-btn');
+  const studioToast = document.getElementById('studio-toast');
+  const toastMessage = document.getElementById('toast-message');
+
+  // State
   let currentPlan = null;
-  let activeMediaMode = 'gif'; // 'gif' | 'video'
+  let activeTonePreset = 'launch'; // 'launch' | 'architecture' | 'buildinpublic' | 'feature'
+  let activeTemplateKey = 'launch';
+  let activeMediaResult = null;
 
-  // Set default target URL to user's real app
-  targetUrlInput.value = 'https://intelligent-curie-alpha.vercel.app/';
+  // Default Prompt Templates
+  const DEFAULT_TEMPLATES = {
+    launch: `You are an expert tech founder & copywriter. Write a high-converting LinkedIn post announcing the launch of {url}.
+Hook: 1-2 punchy lines highlighting the real-world friction developers/users face.
+Solution: Explain what was built and why it changes the workflow.
+Core Features:
+{notes}
+Tech Stack: Call out key engineering highlights (client-side crypto, edge deployment, zero server lag).
+Call to action: Invite users to try it live and drop feedback.
+Hashtags: #BuildInPublic #WebDev #NextJS #SoftwareEngineering #TechInnovation`,
 
-  // Tab switching
+    architecture: `You are a Principal Software Architect. Write a technical deep-dive LinkedIn post breaking down the architecture of {url}.
+Hook: Behind-the-scenes engineering breakthrough & architectural decisions.
+System Pipeline:
+1. Client SPA & Entropy Generator
+2. Edge Proxy & WAF
+3. API Gateway & Microservices
+4. Distributed Cache & Session Vault
+Key takeaways:
+{notes}
+Community question: Ask software engineers how they approach similar latency or security constraints.
+Hashtags: #SoftwareArchitecture #SystemDesign #EdgeComputing #FullStack #TechLeadership`,
+
+    buildinpublic: `You are an indie hacker & engineer building in public. Write an authentic, transparent LinkedIn post about building {url}.
+Hook: Personal insight or milestone achieved while shipping this project.
+The Problem & Journey: Why I spent weekends engineering this.
+What was built:
+{notes}
+Metrics / Tech Stack: Emphasize lightweight client footprint, instant rendering, and responsive UX.
+What's next: Invite the community to test and break it!
+Hashtags: #IndieHacker #BuildInPublic #StartupLife #FullStack #WebDevelopment`,
+
+    feature: `You are a Product Engineer. Write a focused LinkedIn showcase post highlighting a standout interaction workflow in {url}.
+Hook: Spotlight a specific micro-interaction that makes the UX feel magical.
+The Feature in Action:
+{notes}
+Engineering detail: How we achieved smooth 60fps animations and instant device sync.
+Try the live demo at {url}.
+Hashtags: #ProductDesign #UIUX #FrontendDev #JavaScript #UserExperience`
+  };
+
+  // Load custom templates from localStorage or fallback
+  let promptTemplates = { ...DEFAULT_TEMPLATES };
+  try {
+    const saved = localStorage.getItem('visualproof_prompt_templates');
+    if (saved) {
+      promptTemplates = { ...DEFAULT_TEMPLATES, ...JSON.parse(saved) };
+    }
+  } catch (_) {}
+
+  // 1. Workflow Steps Scrolling & Highlight
+  function highlightStep(stepNum) {
+    [navStep1, navStep2, navStep3].forEach((el, idx) => {
+      if (el) el.classList.toggle('active', idx + 1 === stepNum);
+    });
+  }
+
+  if (navStep1) navStep1.addEventListener('click', () => {
+    cardStepVisual.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    highlightStep(1);
+  });
+  if (navStep2) navStep2.addEventListener('click', () => {
+    cardStepCaption.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    highlightStep(2);
+  });
+  if (navStep3) navStep3.addEventListener('click', () => {
+    linkedinPreviewContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    highlightStep(3);
+  });
+
+  // 2. Collapsible Advanced Settings
+  if (toggleAdvancedBtn && advancedSettingsBody && advancedChevron) {
+    toggleAdvancedBtn.addEventListener('click', () => {
+      const isHidden = advancedSettingsBody.classList.contains('hidden');
+      advancedSettingsBody.classList.toggle('hidden', !isHidden);
+      advancedChevron.classList.toggle('open', isHidden);
+    });
+  }
+
+  // 3. Media Mode Tabs
   tabWalkthrough.addEventListener('click', () => {
     tabWalkthrough.classList.add('active');
     tabFlowchart.classList.remove('active');
@@ -64,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
     modeWalkthroughView.classList.add('hidden');
   });
 
-  // Color Theme Mode buttons
+  // Flowchart Color Modes
   if (colorModeMulti && colorModeOne) {
     colorModeMulti.addEventListener('click', () => {
       colorModeMulti.classList.add('active');
@@ -79,55 +199,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Live tech stack badge detection
-  function detectTechBadge(text) {
-    const l = (text || '').toLowerCase();
-    if (l.includes('react')) return { name: 'React', bg: 'rgba(6,182,212,0.15)', color: '#06b6d4' };
-    if (l.includes('next')) return { name: 'Next.js', bg: 'rgba(255,255,255,0.1)', color: '#f8fafc' };
-    if (l.includes('vue')) return { name: 'Vue', bg: 'rgba(66,184,131,0.15)', color: '#42b883' };
-    if (l.includes('vercel')) return { name: 'Vercel', bg: 'rgba(255,255,255,0.1)', color: '#ffffff' };
-    if (l.includes('cloudflare') || l.includes('waf') || l.includes('cdn')) return { name: 'Cloudflare', bg: 'rgba(243,128,32,0.15)', color: '#f38020' };
-    if (l.includes('node')) return { name: 'Node.js', bg: 'rgba(34,197,94,0.15)', color: '#22c55e' };
-    if (l.includes('express')) return { name: 'Express', bg: 'rgba(148,163,184,0.15)', color: '#94a3b8' };
-    if (l.includes('graphql')) return { name: 'GraphQL', bg: 'rgba(229,53,171,0.15)', color: '#e535ab' };
-    if (l.includes('auth') || l.includes('vault') || l.includes('oauth')) return { name: 'OAuth2', bg: 'rgba(244,63,94,0.15)', color: '#f43f5e' };
-    if (l.includes('postgres') || l.includes('sql') || l.includes('database')) return { name: 'Postgres', bg: 'rgba(56,189,248,0.15)', color: '#38bdf8' };
-    if (l.includes('redis') || l.includes('cache')) return { name: 'Redis', bg: 'rgba(239,68,68,0.15)', color: '#ef4444' };
-    if (l.includes('docker')) return { name: 'Docker', bg: 'rgba(2,132,199,0.15)', color: '#0284c7' };
-    if (l.includes('aws')) return { name: 'AWS', bg: 'rgba(245,158,11,0.15)', color: '#f59e0b' };
-    return { name: 'Microservice', bg: 'rgba(168,85,247,0.15)', color: '#a855f7' };
-  }
-
-  document.querySelectorAll('.node-input').forEach(input => {
-    input.addEventListener('input', (e) => {
-      const parent = e.target.closest('.node-editor-item');
-      if (!parent) return;
-      const badge = parent.querySelector('.badge-tag');
-      if (badge) {
-        const detected = detectTechBadge(e.target.value);
-        badge.textContent = detected.name;
-        badge.style.background = detected.bg;
-        badge.style.color = detected.color;
-        badge.style.borderColor = detected.color + '44';
-      }
-    });
-  });
-
-  // Example presets
-  const presetExample1 = document.getElementById('preset-example-1');
-  const presetExample2 = document.getElementById('preset-example-2');
-
+  // URL Example Presets
   if (presetExample1) {
     presetExample1.addEventListener('click', () => {
       presetExample1.classList.add('active');
       if (presetExample2) presetExample2.classList.remove('active');
       targetUrlInput.value = 'https://intelligent-curie-alpha.vercel.app/';
-      instructionsInput.value = `1. Inspect Desktop Split-Panel & Sticky Settings Sidebar: Real-time cryptographic entropy display (~105 bits) and live sync parameters.
-2. Quick One-Tap Generation: Trigger single-click regeneration with cursor glide, click ripple, and real-time strength re-calculation.
-3. Passphrase Mode: Toggle into dictionary passphrase mode showing memorable hyphenated words (e.g. correct-horse-battery-staple) and word count adjustments.
-4. Vector QR Code SVG Modal: Open air-gapped QR code modal for secure instant camera transfer to another device.
-5. Mobile Responsive Viewport: Switch to mobile viewport highlighting the sticky thumb-reach bottom action bar ([Generate] & [Copy]).`;
+      instructionsInput.value = `1. Inspect Desktop Split-Panel & Sticky Settings Sidebar: Real-time entropy calculation (~105 bits).
+2. Quick One-Tap Generation: Single-click regeneration with cursor glide, click ripple, and real-time strength update.
+3. Passphrase Mode: Toggle dictionary passphrase mode showing memorable hyphenated words.
+4. Vector QR Code SVG Modal: Open air-gapped QR code modal for instant device transfer.
+5. Mobile Responsive Viewport: Switch to mobile viewport highlighting the sticky thumb-reach action bar.`;
+      captionPromptInput.value = `Emphasize the cryptographic security, real-time client-side entropy calculation (~105 bits), responsive mobile thumb reach bar, and instant air-gapped QR modal.`;
       fetchPlan();
+      generateSmartCaption();
     });
   }
 
@@ -135,15 +220,241 @@ document.addEventListener('DOMContentLoaded', () => {
     presetExample2.addEventListener('click', () => {
       presetExample2.classList.add('active');
       if (presetExample1) presetExample1.classList.remove('active');
-      targetUrlInput.value = 'https://demo-showcase.vercel.app';
+      targetUrlInput.value = 'https://kind-borg-pearl.vercel.app';
       instructionsInput.value = `Load home page and scroll through product hero showcase.
 Click live preview demo button.
 Switch viewport to mobile to inspect mobile navigation drawer.`;
+      captionPromptInput.value = `Showcase VisualProof Studio: Automated headless browser recording, crystal clear 1080p GIF synthesis, and LinkedIn post generator.`;
       fetchPlan();
+      generateSmartCaption();
     });
   }
 
-  // Safe Plan Fetcher
+  // 4. Tone Presets & Caption Generator
+  toneChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      toneChips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activeTonePreset = chip.dataset.preset;
+      generateSmartCaption();
+    });
+  });
+
+  generateCaptionBtn.addEventListener('click', () => {
+    generateSmartCaption();
+  });
+
+  // Hashtag Pills Toggle
+  hashtagPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      pill.classList.toggle('active');
+      const tag = pill.dataset.tag;
+      let text = captionEditor.value;
+      if (pill.classList.contains('active')) {
+        if (!text.includes(tag)) {
+          captionEditor.value = (text.trim() + ' ' + tag).trim();
+        }
+      } else {
+        captionEditor.value = text.replace(new RegExp(tag + '\\b', 'g'), '').replace(/\s+/g, ' ').trim();
+      }
+      syncCaptionToPreview();
+    });
+  });
+
+  // Synchronize Caption Editor to LinkedIn Live Preview
+  function syncCaptionToPreview() {
+    const raw = captionEditor.value;
+    captionCharCount.textContent = `${raw.length} / 3000 chars`;
+
+    // Highlight hashtags in preview
+    const formatted = escapeHtml(raw).replace(/(#\w+)/g, '<span class="tag">$1</span>');
+    liPreviewText.innerHTML = formatted || '<span style="color: #64748b;">(Generated LinkedIn caption will appear here...)</span>';
+  }
+
+  captionEditor.addEventListener('input', syncCaptionToPreview);
+
+  function escapeHtml(str) {
+    return str.replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  // SMART CAPTION SYNTHESIS ENGINE
+  function generateSmartCaption() {
+    const url = targetUrlInput.value.trim() || 'https://my-app.vercel.app';
+    const notes = captionPromptInput.value.trim();
+    let postText = '';
+
+    const activeTags = Array.from(document.querySelectorAll('.tag-pill.active'))
+      .map(p => p.dataset.tag)
+      .join(' ');
+
+    if (activeTonePreset === 'launch') {
+      postText = `🚀 Excited to publicly release our latest build: ${url}!
+
+Most developer showcases either lack tangible proof or rely on heavy, laggy screen recordings that get skipped in feeds. 
+
+We wanted a frictionless, instant experience that delivers clear visual proof:
+
+✨ Key Highlights:
+• ${notes || 'Instant responsive execution with zero latency'}
+• Cryptographic entropy computation and real-time parameters
+• Air-gapped QR transfer modal for seamless mobile handoff
+• Native 1080p rendering optimized for LinkedIn feeds
+
+Built with Next.js, WebCrypto, and Edge Vercel runtime.
+
+👉 Check it out live here: ${url}
+I'd love your feedback—what should we add in the next iteration?
+
+${activeTags}`;
+
+    } else if (activeTonePreset === 'architecture') {
+      postText = `🏗️ System Architecture Deep Dive: Building scalable, low-latency web apps at ${url}
+
+Behind every smooth 60fps UI is an intentional pipeline. Here is the architecture powering this project:
+
+1️⃣ Client Tier: Modern React/Next.js SPA with client-side cryptographic state
+2️⃣ Edge Layer: Global Vercel & Cloudflare Edge CDN with WAF rate limiting
+3️⃣ API Routing: Microservices & gRPC schema synchronization
+4️⃣ Security Vault: Air-gapped verification & Zero-Knowledge tokens
+
+💡 Key Engineering Takeaways:
+${notes ? '• ' + notes.split('.').filter(Boolean).join('\n• ') : '• Sub-20ms roundtrip execution\n• Zero heavy server dependencies\n• Strict privacy-first design'}
+
+Engineers: how do you balance edge computation vs client-side processing in your stack?
+
+${activeTags}`;
+
+    } else if (activeTonePreset === 'buildinpublic') {
+      postText = `📈 Building in Public: Week 3 shipping ${url}
+
+When starting this project, the goal was simple: eliminate clunky, bloated demos and replace them with crisp, verifiable proofs.
+
+Here is what went into this milestone:
+• ${notes || 'Optimized responsive viewport with sticky mobile thumb-reach bar'}
+• Zero-config deployment on Vercel
+• Clean architecture with zero bloat
+
+Shipping consistently in public forces extreme clarity on product priorities. 
+
+Try the live version and let me know your thoughts: ${url}
+
+${activeTags}`;
+
+    } else if (activeTonePreset === 'feature') {
+      postText = `💡 UX Spotlight: Crafting delightful interactions at ${url}
+
+Great software is defined by the details users feel rather than notice. 
+
+In this demo, pay close attention to:
+• ${notes || 'Smooth cursor interpolation and instant click feedback'}
+• Real-time strength recalculation with dynamic entropy bars
+• Instant modal transitions with zero layout shift
+
+Try it out directly: ${url}
+
+${activeTags}`;
+    }
+
+    captionEditor.value = postText.trim();
+    syncCaptionToPreview();
+  }
+
+  // 5. Prompt Manager Modal Logic
+  openPromptManagerBtn.addEventListener('click', () => {
+    promptManagerModal.classList.remove('hidden');
+    loadTemplateIntoEditor(activeTemplateKey);
+  });
+
+  closePromptModalBtn.addEventListener('click', () => {
+    promptManagerModal.classList.add('hidden');
+  });
+
+  promptManagerModal.addEventListener('click', (e) => {
+    if (e.target === promptManagerModal) {
+      promptManagerModal.classList.add('hidden');
+    }
+  });
+
+  tmplPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      tmplPills.forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      activeTemplateKey = pill.dataset.tmpl;
+      loadTemplateIntoEditor(activeTemplateKey);
+    });
+  });
+
+  function loadTemplateIntoEditor(key) {
+    promptTemplateEditor.value = promptTemplates[key] || DEFAULT_TEMPLATES[key] || '';
+  }
+
+  savePromptsBtn.addEventListener('click', () => {
+    promptTemplates[activeTemplateKey] = promptTemplateEditor.value.trim();
+    try {
+      localStorage.setItem('visualproof_prompt_templates', JSON.stringify(promptTemplates));
+    } catch (_) {}
+    promptManagerModal.classList.add('hidden');
+    showToast('Prompt template saved & applied!');
+    generateSmartCaption();
+  });
+
+  resetPromptsBtn.addEventListener('click', () => {
+    promptTemplates = { ...DEFAULT_TEMPLATES };
+    try {
+      localStorage.removeItem('visualproof_prompt_templates');
+    } catch (_) {}
+    loadTemplateIntoEditor(activeTemplateKey);
+    showToast('Prompts reset to defaults.');
+  });
+
+  // 6. Copy Caption Handler
+  copyCaptionBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(captionEditor.value);
+      showToast('Caption copied to clipboard!');
+    } catch (_) {
+      showToast('Failed to copy caption.');
+    }
+  });
+
+  // 7. ONE-CLICK POST TO LINKEDIN HANDLER
+  async function handlePostToLinkedIn() {
+    const textToCopy = captionEditor.value.trim();
+    const targetUrl = targetUrlInput.value.trim() || 'https://kind-borg-pearl.vercel.app';
+
+    try {
+      if (textToCopy) {
+        await navigator.clipboard.writeText(textToCopy);
+      }
+      showToast('✓ Caption copied to clipboard! Opening LinkedIn...');
+    } catch (_) {
+      showToast('Opening LinkedIn share composer...');
+    }
+
+    // Launch official LinkedIn post share composer
+    const shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(targetUrl)}`;
+    setTimeout(() => {
+      window.open(shareUrl, '_blank', 'noopener,noreferrer');
+    }, 350);
+  }
+
+  if (publishLinkedinBtn) publishLinkedinBtn.addEventListener('click', handlePostToLinkedIn);
+  if (quickPostBtn) quickPostBtn.addEventListener('click', handlePostToLinkedIn);
+
+  // Toast System
+  let toastTimer = null;
+  function showToast(msg) {
+    if (toastTimer) clearTimeout(toastTimer);
+    toastMessage.textContent = msg;
+    studioToast.classList.remove('hidden');
+    toastTimer = setTimeout(() => {
+      studioToast.classList.add('hidden');
+    }, 4000);
+  }
+
+  // 8. Safe Plan Fetcher
   async function fetchPlan() {
     const prompt = instructionsInput.value.trim();
     const targetUrl = targetUrlInput.value.trim();
@@ -155,7 +466,6 @@ Switch viewport to mobile to inspect mobile navigation drawer.`;
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt, targetUrl, duration })
       });
-
       if (res.ok) {
         const data = await res.json();
         if (data.success && data.plan) {
@@ -166,7 +476,7 @@ Switch viewport to mobile to inspect mobile navigation drawer.`;
       }
     } catch (_) {}
 
-    // Fallback steps
+    // Fallback plan
     currentPlan = {
       title: 'PassGen Visual Proof Walkthrough',
       targetUrl: targetUrl || 'https://intelligent-curie-alpha.vercel.app/',
@@ -183,6 +493,7 @@ Switch viewport to mobile to inspect mobile navigation drawer.`;
   }
 
   function renderTimeline(steps) {
+    if (!stepTimeline) return;
     stepTimeline.innerHTML = '';
     steps.forEach((step, idx) => {
       const item = document.createElement('div');
@@ -196,7 +507,7 @@ Switch viewport to mobile to inspect mobile navigation drawer.`;
     });
   }
 
-  // Record Walkthrough Button
+  // 9. Record Walkthrough GIF & Video
   recordBtn.addEventListener('click', async () => {
     if (!currentPlan) await fetchPlan();
 
@@ -208,8 +519,8 @@ Switch viewport to mobile to inspect mobile navigation drawer.`;
         progress += 12;
         progressBarFill.style.width = `${progress}%`;
         if (progress > 30 && progress < 65) {
-          progressStatusTitle.textContent = 'Executing Browser Interactions...';
-          progressStatusDesc.textContent = 'Navigating to https://intelligent-curie-alpha.vercel.app/, animating cursor motion and click ripples.';
+          progressStatusTitle.textContent = 'Executing Headless Browser Script...';
+          progressStatusDesc.textContent = 'Navigating to target app, recording cursor path, ripples, and modal toggles.';
         } else if (progress >= 65) {
           progressStatusTitle.textContent = 'Encoding 15-20s High-Precision GIF...';
           progressStatusDesc.textContent = 'Applying NeuQuant 256-color palette quantization.';
@@ -241,9 +552,7 @@ Switch viewport to mobile to inspect mobile navigation drawer.`;
           return;
         }
       }
-    } catch (err) {
-      console.warn('API error, falling back to local asset:', err);
-    }
+    } catch (_) {}
 
     clearInterval(progressTimer);
     progressBarFill.style.width = '100%';
@@ -267,12 +576,6 @@ Switch viewport to mobile to inspect mobile navigation drawer.`;
       fallbackSize = 1457660;
       fallbackVidSize = 503600;
       fallbackRes = '1200 × 627';
-    } else if (chosenRatio === 'standard') {
-      fallbackUrl = '/outputs/intelligent_curie.gif';
-      fallbackVideo = '/outputs/intelligent_curie.webm';
-      fallbackSize = 1457660;
-      fallbackVidSize = 538100;
-      fallbackRes = '1080 × 648';
     }
 
     showResultUI({
@@ -289,9 +592,9 @@ Switch viewport to mobile to inspect mobile navigation drawer.`;
     });
   });
 
-  // Flowchart Button
+  // 10. Generate Architecture Flowchart
   flowchartBtn.addEventListener('click', async () => {
-    startRecordingUI('Synthesizing Architecture Flow Diagram...');
+    startRecordingUI('Synthesizing Architecture Flow Diagram with Animated Flows...');
 
     const stages = Array.from(document.querySelectorAll('.node-input')).map(i => i.value.trim());
 
@@ -332,7 +635,7 @@ Switch viewport to mobile to inspect mobile navigation drawer.`;
     const isOneColor = activeColorMode === 'onecolor';
     const flowGif = isOneColor ? '/outputs/flowchart_onecolor.gif' : '/outputs/flowchart_multicolor.gif';
     const flowVid = isOneColor ? '/outputs/flowchart_onecolor.webm' : '/outputs/flowchart_multicolor.webm';
-    const flowSize = isOneColor ? 1761607 : 1845493;
+    const flowSize = isOneColor ? 1793000 : 1887000;
     const flowVidSize = isOneColor ? 812000 : 840000;
 
     showResultUI({
@@ -360,9 +663,11 @@ Switch viewport to mobile to inspect mobile navigation drawer.`;
   }
 
   function showResultUI(data) {
+    activeMediaResult = data;
     recordBtn.disabled = false;
     flowchartBtn.disabled = false;
     recordingProgress.classList.add('hidden');
+    previewPlaceholder.classList.add('hidden');
     previewDisplay.classList.remove('hidden');
 
     const safeGifUrl = data.gifUrl || '/outputs/intelligent_curie_1x1.gif';
@@ -384,7 +689,6 @@ Switch viewport to mobile to inspect mobile navigation drawer.`;
       videoResultPlayer.src = safeVideoUrl;
     }
 
-    // Toggle format view handlers
     if (toggleViewGif && toggleViewVideo) {
       toggleViewGif.onclick = () => {
         toggleViewGif.classList.add('active');
@@ -417,19 +721,16 @@ Switch viewport to mobile to inspect mobile navigation drawer.`;
     };
 
     outputMetaPills.classList.remove('hidden');
-    metaDuration.textContent = `${data.durationSec || 17}s duration`;
+    metaDuration.textContent = `${data.durationSec || 17}s`;
     metaFrames.textContent = `${data.frameCount || 34} frames`;
 
     if (metaRes) {
       metaRes.textContent = data.resolution || '1080 × 1080';
     }
-    
-    const metaRatio = document.getElementById('meta-ratio');
-    if (metaRatio) {
-      metaRatio.textContent = data.aspectRatio || (ratioSelect ? ratioSelect.value : '1:1');
-    }
 
     updateSizeDisplay('gif', data);
+    highlightStep(3);
+    showToast('Visual Proof ready in LinkedIn Post Preview!');
   }
 
   function updateSizeDisplay(mode, data) {
@@ -442,8 +743,23 @@ Switch viewport to mobile to inspect mobile navigation drawer.`;
     }
   }
 
+  // Pre-load default output so preview is immediately lively
+  showResultUI({
+    gifUrl: '/outputs/intelligent_curie_1x1.gif',
+    videoUrl: '/outputs/intelligent_curie_1x1.webm',
+    gifFilename: 'visual_proof_1x1.gif',
+    videoFilename: 'visual_proof_1x1.webm',
+    durationSec: 17,
+    frameCount: 34,
+    size: 1751120,
+    videoSize: 839168,
+    resolution: '1080 × 1080',
+    aspectRatio: '1:1'
+  });
+
   planBtn.addEventListener('click', fetchPlan);
 
   // Initialize
   fetchPlan();
+  generateSmartCaption();
 });

@@ -166,17 +166,21 @@ async function generateFlowchartGif(options = {}) {
             pointer-events: none;
             z-index: 5;
           }
+          @keyframes flowDash {
+            to { stroke-dashoffset: -24; }
+          }
           .flow-line {
-            stroke: #1e293b;
-            stroke-width: 2.5;
+            stroke: #334155;
+            stroke-width: 2.8;
             fill: none;
             stroke-dasharray: 6 4;
-            transition: stroke 0.4s ease;
+            transition: stroke 0.3s ease;
           }
           .flow-line.active {
             stroke: ${defaultAccent};
-            stroke-dasharray: none;
-            filter: drop-shadow(0 0 6px ${defaultAccent}88);
+            stroke-dasharray: 8 4;
+            animation: flowDash 0.8s linear infinite;
+            filter: drop-shadow(0 0 6px ${defaultAccent}aa);
           }
 
           /* Flow Packet Pulse */
@@ -509,6 +513,42 @@ async function generateFlowchartGif(options = {}) {
     await page.setContent(htmlContent);
     await page.waitForTimeout(400);
 
+    // Draw SVG connector lines bridging all sequential nodes with directional arrows
+    await page.evaluate(() => {
+      const nodeIds = [
+        'terminal-start',
+        'stage-node-0',
+        'stage-node-1',
+        'diamond-node',
+        'stage-node-2',
+        'stage-node-3',
+        'terminal-end'
+      ];
+      const svg = document.getElementById('connector-svg');
+      if (!svg) return;
+
+      for (let i = 0; i < nodeIds.length - 1; i++) {
+        const fromEl = document.getElementById(nodeIds[i]);
+        const toEl = document.getElementById(nodeIds[i + 1]);
+        if (!fromEl || !toEl) continue;
+
+        const rFrom = fromEl.getBoundingClientRect();
+        const rTo = toEl.getBoundingClientRect();
+
+        const x1 = Math.round(rFrom.right + 3);
+        const y1 = Math.round(rFrom.top + rFrom.height / 2);
+        const x2 = Math.round(rTo.left - 5);
+        const y2 = Math.round(rTo.top + rTo.height / 2);
+
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('id', `flow-line-${i}`);
+        path.setAttribute('class', 'flow-line');
+        path.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
+        path.setAttribute('marker-end', 'url(#arrow-dim)');
+        svg.appendChild(path);
+      }
+    });
+
     // Initial frame
     const initBuf = await page.screenshot({ type: 'png' });
     frames.push({ buffer: initBuf, delay: 600 });
@@ -533,6 +573,14 @@ async function generateFlowchartGif(options = {}) {
           target.classList.add('active');
         }
 
+        if (seqIdx > 0) {
+          const prevLine = document.getElementById(`flow-line-${seqIdx - 1}`);
+          if (prevLine) {
+            prevLine.classList.add('active');
+            prevLine.setAttribute('marker-end', 'url(#arrow)');
+          }
+        }
+
         const msg = document.getElementById('status-message');
         const proto = document.getElementById('status-protocol');
         if (msg) msg.textContent = stepInfo.message;
@@ -548,18 +596,36 @@ async function generateFlowchartGif(options = {}) {
         }
       }, { seqIdx: s, stepInfo: step });
 
-      // Capture progression frames
+      // Capture progression frames with packet motion along connecting arrow
       for (let f = 0; f < 4; f++) {
-        await page.waitForTimeout(200);
+        if (s > 0) {
+          const lineIdx = s - 1;
+          await page.evaluate(({ lineIdx, frameIdx, totalFrames }) => {
+            const line = document.getElementById(`flow-line-${lineIdx}`);
+            const packet = document.getElementById('flow-packet');
+            if (line && packet) {
+              const length = line.getTotalLength();
+              const pt = line.getPointAtLength(length * (frameIdx / totalFrames));
+              packet.style.left = Math.round(pt.x) + 'px';
+              packet.style.top = Math.round(pt.y) + 'px';
+              packet.style.opacity = '1';
+            }
+          }, { lineIdx, frameIdx: f + 1, totalFrames: 4 });
+        }
+        await page.waitForTimeout(160);
         const buf = await page.screenshot({ type: 'png' });
         frames.push({ buffer: buf, delay: 280 });
       }
     }
 
-    // Final hold frames with all circuits lit
+    // Final hold frames with all circuits and arrows lit
     await page.evaluate(() => {
       document.getElementById('status-message').textContent = '✓ Pipeline Executed: Zero Bottlenecks · Stream Complete';
       document.getElementById('status-protocol').textContent = 'LATENCY: 18ms';
+      document.querySelectorAll('.flow-line').forEach(line => {
+        line.classList.add('active');
+        line.setAttribute('marker-end', 'url(#arrow)');
+      });
     });
     for (let f = 0; f < 5; f++) {
       await page.waitForTimeout(200);
