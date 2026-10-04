@@ -99,8 +99,26 @@ Switching the viewport to Mobile to highlight the sticky thumb-reach action bar 
               </select>
             </div>
             <div class="meta-field">
-              <label>Visual Polish</label>
-              <div class="badge-toggle">Smooth Cursor + Ripple</div>
+              <label>Aspect Ratio & Resolution</label>
+              <select id="ratio-select" class="select-box">
+                <option value="1:1" selected>1:1 Square (1080×1080 · Feeds & Carousels)</option>
+                <option value="4:5">4:5 Portrait (1080×1350 · Mobile Scroll)</option>
+                <option value="1.91:1">1.91:1 Landscape (1200×627 · Link Previews)</option>
+                <option value="standard">Natural Canvas (800×480 · Contain / No Squish)</option>
+              </select>
+            </div>
+          </div>
+          <div class="config-meta-row" style="margin-top: 0.6rem;">
+            <div class="meta-field">
+              <label>Fit Strategy</label>
+              <select id="fit-select" class="select-box">
+                <option value="crop" selected>Smart Center-Crop (Never Squish)</option>
+                <option value="contain">Contain & Frame (Preserve All Pixels)</option>
+              </select>
+            </div>
+            <div class="meta-field">
+              <label>Max Size Limit</label>
+              <div class="badge-toggle" style="background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">Max 5 MB (Strict)</div>
             </div>
           </div>
 
@@ -177,9 +195,10 @@ Switching the viewport to Mobile to highlight the sticky thumb-reach action bar 
         <div class="preview-header">
           <h2>Visual Proof Canvas</h2>
           <div id="output-meta-pills" class="meta-pills hidden">
-            <span class="pill-badge" id="meta-duration">18s</span>
-            <span class="pill-badge" id="meta-frames">64 frames</span>
-            <span class="pill-badge accent" id="meta-size">1.8 MB</span>
+            <span class="pill-badge" id="meta-duration">17s</span>
+            <span class="pill-badge" id="meta-frames">49 frames</span>
+            <span class="pill-badge" id="meta-ratio" style="color: var(--accent-cyan); border-color: rgba(6, 182, 212, 0.4);">1:1 Square</span>
+            <span class="pill-badge accent" id="meta-size">1.03 MB</span>
           </div>
         </div>
 

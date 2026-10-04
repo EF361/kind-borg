@@ -9,13 +9,36 @@ module.exports = (req, res) => {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+    const ratio = body.aspectRatio || '1:1';
+
+    let gifUrl = '/outputs/intelligent_curie_1x1.gif';
+    let gifFilename = 'visualproof_1x1_square.gif';
+    let size = 1080000;
+    let frameCount = 49;
+    let durationSec = 17;
+
+    if (ratio === '4:5') {
+      gifUrl = '/outputs/intelligent_curie_4x5.gif';
+      gifFilename = 'visualproof_4x5_portrait.gif';
+      size = 920000;
+    } else if (ratio === '1.91:1') {
+      gifUrl = '/outputs/intelligent_curie_landscape.gif';
+      gifFilename = 'visualproof_1.91x1_landscape.gif';
+      size = 1048000;
+    } else if (ratio === 'standard') {
+      gifUrl = '/outputs/intelligent_curie.gif';
+      gifFilename = 'visualproof_standard.gif';
+      size = 1130000;
+    }
+
     return res.status(200).json({
       success: true,
-      gifUrl: '/outputs/intelligent_curie.gif',
-      gifFilename: 'visualproof_intelligent_curie.gif',
-      size: 1595392,
-      frameCount: 49,
-      durationSec: 17,
+      gifUrl,
+      gifFilename,
+      size,
+      frameCount,
+      durationSec,
+      aspectRatio: ratio,
       clientSynthesize: false,
       targetUrl: body.targetUrl || 'https://intelligent-curie-alpha.vercel.app/'
     });

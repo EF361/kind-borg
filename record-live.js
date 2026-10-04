@@ -25,10 +25,8 @@ async function recordLiveUserApp() {
   console.log('Navigating to app...');
   await page.goto(targetUrl, { waitUntil: 'networkidle', timeout: 30000 });
 
-  // Inject overlay styles and cursor
   await injectOverlay(page);
 
-  // Helper to glide cursor and capture
   async function glideCursorTo(targetX, targetY, waypoints = 6) {
     for (let w = 1; w <= waypoints; w++) {
       const t = w / waypoints;
@@ -47,7 +45,6 @@ async function recordLiveUserApp() {
     currentCursor = { x: targetX, y: targetY };
   }
 
-  // Helper to click with ripple
   async function clickWithRipple(selector = null) {
     await page.evaluate(({ x, y }) => {
       const ripple = document.createElement('div');
@@ -72,7 +69,6 @@ async function recordLiveUserApp() {
     }
   }
 
-  // Helper to settle
   async function settle(count = 5) {
     for (let i = 0; i < count; i++) {
       await page.waitForTimeout(250);
@@ -81,7 +77,6 @@ async function recordLiveUserApp() {
     }
   }
 
-  // Helper to set badge
   async function setBadge(text) {
     await page.evaluate((caption) => {
       const badge = document.getElementById('__vp_step_badge');
@@ -141,7 +136,6 @@ async function recordLiveUserApp() {
   await injectOverlay(page);
   await setBadge('Mobile Viewport: Sticky Thumb-Reach Action Bar');
 
-  // Find mobile generate button
   const mobileGen = await page.$('button:has-text("Generate")');
   if (mobileGen) {
     const box = await mobileGen.boundingBox();
@@ -154,17 +148,31 @@ async function recordLiveUserApp() {
 
   await browser.close();
 
-  console.log(`Captured ${frames.length} frames. Encoding GIF...`);
-  const outputPath = path.join(__dirname, 'public', 'outputs', 'intelligent_curie.gif');
-  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+  console.log(`Captured ${frames.length} frames.`);
+  const outputDir = path.join(__dirname, 'public', 'outputs');
+  fs.mkdirSync(outputDir, { recursive: true });
 
-  const result = await encodeGifFromPngFrames(frames, outputPath, 720);
-  // Also copy to visualproof_latest.gif
-  fs.copyFileSync(outputPath, path.join(__dirname, 'public', 'outputs', 'visualproof_latest.gif'));
-  fs.copyFileSync(outputPath, path.join(__dirname, 'src', 'outputs', 'visualproof_latest.gif'));
+  // 1. Standard Natural Aspect Ratio (Contain mode: preserves both Desktop and Mobile with zero squish)
+  console.log('Encoding standard un-squished GIF...');
+  const stdRes = await encodeGifFromPngFrames(frames, path.join(outputDir, 'intelligent_curie.gif'), 800, 480, 'contain');
+  console.log(`Standard GIF: ${(stdRes.size / 1024 / 1024).toFixed(2)} MB`);
 
-  console.log(`Success! Encoded GIF: ${outputPath} (${result.frameCount} frames, ${Math.round(result.size / 1024)} KB)`);
-  return result;
+  // 2. 1:1 Square (720x720, Crop mode - Feed photos / Carousels)
+  console.log('Encoding 1:1 Square GIF (Crop mode, no squish)...');
+  const squareRes = await encodeGifFromPngFrames(frames, path.join(outputDir, 'intelligent_curie_1x1.gif'), 720, 720, 'crop');
+  console.log(`1:1 Square GIF: ${(squareRes.size / 1024 / 1024).toFixed(2)} MB`);
+
+  // 3. 4:5 Portrait (640x800, Crop mode - Mobile-heavy feeds)
+  console.log('Encoding 4:5 Portrait GIF (Crop mode, no squish)...');
+  const portraitRes = await encodeGifFromPngFrames(frames, path.join(outputDir, 'intelligent_curie_4x5.gif'), 640, 800, 'crop');
+  console.log(`4:5 Portrait GIF: ${(portraitRes.size / 1024 / 1024).toFixed(2)} MB`);
+
+  // 4. 1.91:1 Landscape (800x418, Crop mode - Link previews & Wide infographics)
+  console.log('Encoding 1.91:1 Landscape GIF (Crop mode, no squish)...');
+  const landscapeRes = await encodeGifFromPngFrames(frames, path.join(outputDir, 'intelligent_curie_landscape.gif'), 800, 418, 'crop');
+  console.log(`1.91:1 Landscape GIF: ${(landscapeRes.size / 1024 / 1024).toFixed(2)} MB`);
+
+  return { stdRes, squareRes, portraitRes, landscapeRes };
 }
 
 async function injectOverlay(page) {

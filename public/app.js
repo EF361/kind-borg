@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const targetUrlInput = document.getElementById('target-url-input');
   const instructionsInput = document.getElementById('instructions-input');
   const durationSelect = document.getElementById('duration-select');
+  const ratioSelect = document.getElementById('ratio-select');
+  const fitSelect = document.getElementById('fit-select');
   const planBtn = document.getElementById('plan-btn');
   const recordBtn = document.getElementById('record-btn');
   const stepTimeline = document.getElementById('step-timeline');
@@ -164,7 +166,9 @@ Switch viewport to mobile to inspect mobile navigation drawer.`;
           plan: currentPlan,
           prompt: instructionsInput.value.trim(),
           targetUrl: targetUrlInput.value.trim(),
-          duration: parseInt(durationSelect.value, 10)
+          duration: parseInt(durationSelect.value, 10),
+          aspectRatio: ratioSelect ? ratioSelect.value : '1:1',
+          fitStrategy: fitSelect ? fitSelect.value : 'crop'
         })
       });
 
@@ -184,12 +188,28 @@ Switch viewport to mobile to inspect mobile navigation drawer.`;
 
     clearInterval(progressTimer);
     progressBarFill.style.width = '100%';
+
+    const chosenRatio = ratioSelect ? ratioSelect.value : '1:1';
+    let fallbackUrl = '/outputs/intelligent_curie_1x1.gif';
+    let fallbackSize = 1080000;
+    if (chosenRatio === '4:5') {
+      fallbackUrl = '/outputs/intelligent_curie_4x5.gif';
+      fallbackSize = 920000;
+    } else if (chosenRatio === '1.91:1') {
+      fallbackUrl = '/outputs/intelligent_curie_landscape.gif';
+      fallbackSize = 1048000;
+    } else if (chosenRatio === 'standard') {
+      fallbackUrl = '/outputs/intelligent_curie.gif';
+      fallbackSize = 1130000;
+    }
+
     showResultUI({
-      gifUrl: '/outputs/intelligent_curie.gif',
-      gifFilename: 'visualproof_intelligent_curie.gif',
+      gifUrl: fallbackUrl,
+      gifFilename: `visualproof_${chosenRatio.replace(':', 'x')}.gif`,
       durationSec: 17,
       frameCount: 49,
-      size: 1595392
+      size: fallbackSize,
+      aspectRatio: chosenRatio
     });
   });
 
@@ -265,7 +285,12 @@ Switch viewport to mobile to inspect mobile navigation drawer.`;
     metaDuration.textContent = `${data.durationSec || 17}s duration`;
     metaFrames.textContent = `${data.frameCount || 49} frames`;
     
-    const bytes = typeof data.size === 'number' && !isNaN(data.size) ? data.size : 1595392;
+    const metaRatio = document.getElementById('meta-ratio');
+    if (metaRatio) {
+      metaRatio.textContent = data.aspectRatio || (ratioSelect ? ratioSelect.value : '1:1');
+    }
+
+    const bytes = typeof data.size === 'number' && !isNaN(data.size) ? data.size : 1080000;
     const sizeMb = (bytes / (1024 * 1024)).toFixed(2);
     metaSize.textContent = `${sizeMb} MB`;
   }
