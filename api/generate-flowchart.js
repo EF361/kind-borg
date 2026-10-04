@@ -8,13 +8,38 @@ module.exports = (req, res) => {
   }
 
   try {
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+    const colorMode = body.colorMode === 'onecolor' ? 'onecolor' : 'multicolor';
+
+    let gifUrl = '/outputs/flowchart_multicolor.gif';
+    let videoUrl = '/outputs/flowchart_multicolor.webm';
+    let gifFilename = 'flowchart_multicolor_techstack.gif';
+    let videoFilename = 'flowchart_multicolor_techstack.webm';
+    let size = 1845493;
+    let videoSize = 840000;
+
+    if (colorMode === 'onecolor') {
+      gifUrl = '/outputs/flowchart_onecolor.gif';
+      videoUrl = '/outputs/flowchart_onecolor.webm';
+      gifFilename = 'flowchart_onecolor_minimalist.gif';
+      videoFilename = 'flowchart_onecolor_minimalist.webm';
+      size = 1761607;
+      videoSize = 812000;
+    }
+
     return res.status(200).json({
       success: true,
-      gifUrl: '/outputs/flowchart_1791097117878.gif',
-      gifFilename: 'flowchart_architecture.gif',
-      size: 849001,
-      frameCount: 36,
-      durationSec: 11,
+      gifUrl,
+      videoUrl,
+      gifFilename,
+      videoFilename,
+      size,
+      videoSize,
+      resolution: '1080 × 620',
+      frameCount: 34,
+      durationSec: 12,
+      colorMode,
+      title: body.title || 'Enterprise Serverless & Edge Pipeline',
       clientSynthesize: false
     });
   } catch (err) {

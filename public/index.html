@@ -154,27 +154,48 @@ Switching the viewport to Mobile to highlight the sticky thumb-reach action bar 
             <input type="text" id="flowchart-title-input" value="Enterprise Serverless & Edge Pipeline" class="text-input">
           </div>
 
+          <div class="config-meta-row" style="margin-top: 1rem; margin-bottom: 1.2rem;">
+            <div class="meta-field" style="width: 100%;">
+              <label>Color Theme Mode</label>
+              <div class="color-mode-toggle-group" style="display: flex; gap: 8px;">
+                <button type="button" id="color-mode-multi" class="pill-btn active" style="flex: 1; font-weight: 700; text-align: center; justify-content: center;">
+                  <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #06b6d4; margin-right: 6px;"></span>
+                  Multicolor (Tech Brand Accents)
+                </button>
+                <button type="button" id="color-mode-one" class="pill-btn" style="flex: 1; font-weight: 700; text-align: center; justify-content: center;">
+                  <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #3b82f6; margin-right: 6px;"></span>
+                  One Color (Minimalist Blue)
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div class="flowchart-nodes-editor">
-            <label class="input-label">Sequential Architecture Stages</label>
+            <label class="input-label">Sequential Architecture Stages & Auto-Detected Tech</label>
             <div class="node-editor-item">
               <span class="step-num">1</span>
               <input type="text" value="Web & Mobile Client (React / Next.js)" class="node-input" data-idx="0">
+              <span class="badge-tag" style="background: rgba(6, 182, 212, 0.15); color: #06b6d4; border-color: rgba(6, 182, 212, 0.3);">React</span>
             </div>
             <div class="node-editor-item">
               <span class="step-num">2</span>
               <input type="text" value="Edge CDN & WAF (Vercel / Cloudflare)" class="node-input" data-idx="1">
+              <span class="badge-tag" style="background: rgba(255, 255, 255, 0.1); color: #f8fafc; border-color: rgba(255, 255, 255, 0.2);">Vercel</span>
             </div>
             <div class="node-editor-item">
               <span class="step-num">3</span>
               <input type="text" value="API Gateway (Node.js Express / GraphQL)" class="node-input" data-idx="2">
+              <span class="badge-tag" style="background: rgba(34, 197, 94, 0.15); color: #22c55e; border-color: rgba(34, 197, 94, 0.3);">Node.js</span>
             </div>
             <div class="node-editor-item">
               <span class="step-num">4</span>
               <input type="text" value="Auth & Session Vault (OAuth2 / WebCrypto)" class="node-input" data-idx="3">
+              <span class="badge-tag" style="background: rgba(244, 63, 94, 0.15); color: #f43f5e; border-color: rgba(244, 63, 94, 0.3);">OAuth2</span>
             </div>
             <div class="node-editor-item">
               <span class="step-num">5</span>
               <input type="text" value="Distributed Storage (PostgreSQL & Redis)" class="node-input" data-idx="4">
+              <span class="badge-tag" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border-color: rgba(56, 189, 248, 0.3);">Postgres</span>
             </div>
           </div>
 
@@ -185,7 +206,7 @@ Switching the viewport to Mobile to highlight the sticky thumb-reach action bar 
               <rect x="14" y="14" width="7" height="7"></rect>
               <rect x="3" y="14" width="7" height="7"></rect>
             </svg>
-            <span>Generate Animated Architecture GIF</span>
+            <span>Generate Animated Architecture Flow</span>
           </button>
         </div>
       </section>

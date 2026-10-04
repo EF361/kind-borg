@@ -18,6 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Flowchart form elements
   const flowchartTitleInput = document.getElementById('flowchart-title-input');
   const flowchartBtn = document.getElementById('flowchart-btn');
+  const colorModeMulti = document.getElementById('color-mode-multi');
+  const colorModeOne = document.getElementById('color-mode-one');
+  let activeColorMode = 'multicolor'; // 'multicolor' | 'onecolor'
 
   // Output elements
   const previewPlaceholder = document.getElementById('preview-placeholder');
@@ -59,6 +62,55 @@ document.addEventListener('DOMContentLoaded', () => {
     tabWalkthrough.classList.remove('active');
     modeFlowchartView.classList.remove('hidden');
     modeWalkthroughView.classList.add('hidden');
+  });
+
+  // Color Theme Mode buttons
+  if (colorModeMulti && colorModeOne) {
+    colorModeMulti.addEventListener('click', () => {
+      colorModeMulti.classList.add('active');
+      colorModeOne.classList.remove('active');
+      activeColorMode = 'multicolor';
+    });
+
+    colorModeOne.addEventListener('click', () => {
+      colorModeOne.classList.add('active');
+      colorModeMulti.classList.remove('active');
+      activeColorMode = 'onecolor';
+    });
+  }
+
+  // Live tech stack badge detection
+  function detectTechBadge(text) {
+    const l = (text || '').toLowerCase();
+    if (l.includes('react')) return { name: 'React', bg: 'rgba(6,182,212,0.15)', color: '#06b6d4' };
+    if (l.includes('next')) return { name: 'Next.js', bg: 'rgba(255,255,255,0.1)', color: '#f8fafc' };
+    if (l.includes('vue')) return { name: 'Vue', bg: 'rgba(66,184,131,0.15)', color: '#42b883' };
+    if (l.includes('vercel')) return { name: 'Vercel', bg: 'rgba(255,255,255,0.1)', color: '#ffffff' };
+    if (l.includes('cloudflare') || l.includes('waf') || l.includes('cdn')) return { name: 'Cloudflare', bg: 'rgba(243,128,32,0.15)', color: '#f38020' };
+    if (l.includes('node')) return { name: 'Node.js', bg: 'rgba(34,197,94,0.15)', color: '#22c55e' };
+    if (l.includes('express')) return { name: 'Express', bg: 'rgba(148,163,184,0.15)', color: '#94a3b8' };
+    if (l.includes('graphql')) return { name: 'GraphQL', bg: 'rgba(229,53,171,0.15)', color: '#e535ab' };
+    if (l.includes('auth') || l.includes('vault') || l.includes('oauth')) return { name: 'OAuth2', bg: 'rgba(244,63,94,0.15)', color: '#f43f5e' };
+    if (l.includes('postgres') || l.includes('sql') || l.includes('database')) return { name: 'Postgres', bg: 'rgba(56,189,248,0.15)', color: '#38bdf8' };
+    if (l.includes('redis') || l.includes('cache')) return { name: 'Redis', bg: 'rgba(239,68,68,0.15)', color: '#ef4444' };
+    if (l.includes('docker')) return { name: 'Docker', bg: 'rgba(2,132,199,0.15)', color: '#0284c7' };
+    if (l.includes('aws')) return { name: 'AWS', bg: 'rgba(245,158,11,0.15)', color: '#f59e0b' };
+    return { name: 'Microservice', bg: 'rgba(168,85,247,0.15)', color: '#a855f7' };
+  }
+
+  document.querySelectorAll('.node-input').forEach(input => {
+    input.addEventListener('input', (e) => {
+      const parent = e.target.closest('.node-editor-item');
+      if (!parent) return;
+      const badge = parent.querySelector('.badge-tag');
+      if (badge) {
+        const detected = detectTechBadge(e.target.value);
+        badge.textContent = detected.name;
+        badge.style.background = detected.bg;
+        badge.style.color = detected.color;
+        badge.style.borderColor = detected.color + '44';
+      }
+    });
   });
 
   // Example presets
@@ -240,6 +292,8 @@ Switch viewport to mobile to inspect mobile navigation drawer.`;
   flowchartBtn.addEventListener('click', async () => {
     startRecordingUI('Synthesizing Architecture Flow Diagram...');
 
+    const stages = Array.from(document.querySelectorAll('.node-input')).map(i => i.value.trim());
+
     let progress = 20;
     const progressTimer = setInterval(() => {
       if (progress < 90) {
@@ -253,7 +307,9 @@ Switch viewport to mobile to inspect mobile navigation drawer.`;
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: flowchartTitleInput.value.trim()
+          title: flowchartTitleInput.value.trim(),
+          colorMode: activeColorMode,
+          stages
         })
       });
 
@@ -271,13 +327,24 @@ Switch viewport to mobile to inspect mobile navigation drawer.`;
 
     clearInterval(progressTimer);
     progressBarFill.style.width = '100%';
+
+    const isOneColor = activeColorMode === 'onecolor';
+    const flowGif = isOneColor ? '/outputs/flowchart_onecolor.gif' : '/outputs/flowchart_multicolor.gif';
+    const flowVid = isOneColor ? '/outputs/flowchart_onecolor.webm' : '/outputs/flowchart_multicolor.webm';
+    const flowSize = isOneColor ? 1761607 : 1845493;
+    const flowVidSize = isOneColor ? 812000 : 840000;
+
     showResultUI({
-      gifUrl: '/outputs/flowchart_1791097117878.gif',
-      gifFilename: 'flowchart_architecture.gif',
-      durationSec: 11,
-      frameCount: 36,
-      size: 849001,
-      resolution: '800 × 450'
+      gifUrl: flowGif,
+      videoUrl: flowVid,
+      gifFilename: `flowchart_${activeColorMode}.gif`,
+      videoFilename: `flowchart_${activeColorMode}.webm`,
+      durationSec: 12,
+      frameCount: 34,
+      size: flowSize,
+      videoSize: flowVidSize,
+      resolution: '1080 × 620',
+      aspectRatio: '1.74:1'
     });
   });
 
