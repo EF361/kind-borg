@@ -1,0 +1,20 @@
+{
+  "name": "kind-borg",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node test-verify.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^5.2.1",
+    "gifenc": "^1.0.3",
+    "playwright": "^1.63.0",
+    "pngjs": "^7.0.0"
+  }
+}
