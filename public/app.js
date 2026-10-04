@@ -27,15 +27,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const progressStatusDesc = document.getElementById('progress-status-desc');
   const progressBarFill = document.getElementById('progress-bar-fill');
   const gifResultImg = document.getElementById('gif-result-img');
+  const videoResultPlayer = document.getElementById('video-result-player');
+  const toggleViewGif = document.getElementById('toggle-view-gif');
+  const toggleViewVideo = document.getElementById('toggle-view-video');
   const downloadGifBtn = document.getElementById('download-gif-btn');
+  const downloadVideoBtn = document.getElementById('download-video-btn');
   const openNewTabBtn = document.getElementById('open-new-tab-btn');
   const outputMetaPills = document.getElementById('output-meta-pills');
   const metaDuration = document.getElementById('meta-duration');
   const metaFrames = document.getElementById('meta-frames');
+  const metaRes = document.getElementById('meta-res');
   const metaSize = document.getElementById('meta-size');
   const recentList = document.getElementById('recent-list');
 
   let currentPlan = null;
+  let activeMediaMode = 'gif'; // 'gif' | 'video'
 
   // Set default target URL to user's real app
   targetUrlInput.value = 'https://intelligent-curie-alpha.vercel.app/';
@@ -191,24 +197,41 @@ Switch viewport to mobile to inspect mobile navigation drawer.`;
 
     const chosenRatio = ratioSelect ? ratioSelect.value : '1:1';
     let fallbackUrl = '/outputs/intelligent_curie_1x1.gif';
-    let fallbackSize = 1080000;
+    let fallbackVideo = '/outputs/intelligent_curie_1x1.webm';
+    let fallbackSize = 1751120;
+    let fallbackVidSize = 839168;
+    let fallbackRes = '1080 × 1080';
+
     if (chosenRatio === '4:5') {
       fallbackUrl = '/outputs/intelligent_curie_4x5.gif';
-      fallbackSize = 920000;
+      fallbackVideo = '/outputs/intelligent_curie_4x5.webm';
+      fallbackSize = 1772140;
+      fallbackVidSize = 1092800;
+      fallbackRes = '1080 × 1350';
     } else if (chosenRatio === '1.91:1') {
       fallbackUrl = '/outputs/intelligent_curie_landscape.gif';
-      fallbackSize = 1048000;
+      fallbackVideo = '/outputs/intelligent_curie_landscape.webm';
+      fallbackSize = 1457660;
+      fallbackVidSize = 503600;
+      fallbackRes = '1200 × 627';
     } else if (chosenRatio === 'standard') {
       fallbackUrl = '/outputs/intelligent_curie.gif';
-      fallbackSize = 1130000;
+      fallbackVideo = '/outputs/intelligent_curie.webm';
+      fallbackSize = 1457660;
+      fallbackVidSize = 538100;
+      fallbackRes = '1080 × 648';
     }
 
     showResultUI({
       gifUrl: fallbackUrl,
+      videoUrl: fallbackVideo,
       gifFilename: `visualproof_${chosenRatio.replace(':', 'x')}.gif`,
+      videoFilename: `visualproof_${chosenRatio.replace(':', 'x')}.webm`,
       durationSec: 17,
-      frameCount: 49,
+      frameCount: 34,
       size: fallbackSize,
+      videoSize: fallbackVidSize,
+      resolution: fallbackRes,
       aspectRatio: chosenRatio
     });
   });
@@ -253,7 +276,8 @@ Switch viewport to mobile to inspect mobile navigation drawer.`;
       gifFilename: 'flowchart_architecture.gif',
       durationSec: 11,
       frameCount: 36,
-      size: 849001
+      size: 849001,
+      resolution: '800 × 450'
     });
   });
 
@@ -273,26 +297,81 @@ Switch viewport to mobile to inspect mobile navigation drawer.`;
     recordingProgress.classList.add('hidden');
     previewDisplay.classList.remove('hidden');
 
-    const safeUrl = data.gifUrl || '/outputs/intelligent_curie.gif';
-    // Load image cleanly
-    gifResultImg.src = safeUrl;
-    downloadGifBtn.href = safeUrl;
+    const safeGifUrl = data.gifUrl || '/outputs/intelligent_curie_1x1.gif';
+    const safeVideoUrl = data.videoUrl || (safeGifUrl.replace(/\.gif$/, '.webm'));
+
+    gifResultImg.src = safeGifUrl;
+    downloadGifBtn.href = safeGifUrl;
     downloadGifBtn.download = data.gifFilename || 'visual_proof.gif';
 
-    openNewTabBtn.onclick = () => window.open(safeUrl, '_blank');
+    if (downloadVideoBtn && safeVideoUrl) {
+      downloadVideoBtn.style.display = 'inline-flex';
+      downloadVideoBtn.href = safeVideoUrl;
+      downloadVideoBtn.download = data.videoFilename || 'visual_proof.webm';
+    } else if (downloadVideoBtn) {
+      downloadVideoBtn.style.display = 'none';
+    }
+
+    if (videoResultPlayer && safeVideoUrl) {
+      videoResultPlayer.src = safeVideoUrl;
+    }
+
+    // Toggle format view handlers
+    if (toggleViewGif && toggleViewVideo) {
+      toggleViewGif.onclick = () => {
+        toggleViewGif.classList.add('active');
+        toggleViewVideo.classList.remove('active');
+        gifResultImg.classList.remove('hidden');
+        if (videoResultPlayer) {
+          videoResultPlayer.classList.add('hidden');
+          videoResultPlayer.pause();
+        }
+        updateSizeDisplay('gif', data);
+      };
+
+      toggleViewVideo.onclick = () => {
+        toggleViewVideo.classList.add('active');
+        toggleViewGif.classList.remove('active');
+        gifResultImg.classList.add('hidden');
+        if (videoResultPlayer) {
+          videoResultPlayer.classList.remove('hidden');
+          videoResultPlayer.play().catch(() => {});
+        }
+        updateSizeDisplay('video', data);
+      };
+    }
+
+    openNewTabBtn.onclick = () => {
+      const activeUrl = (toggleViewVideo && toggleViewVideo.classList.contains('active') && safeVideoUrl)
+        ? safeVideoUrl
+        : safeGifUrl;
+      window.open(activeUrl, '_blank');
+    };
 
     outputMetaPills.classList.remove('hidden');
     metaDuration.textContent = `${data.durationSec || 17}s duration`;
-    metaFrames.textContent = `${data.frameCount || 49} frames`;
+    metaFrames.textContent = `${data.frameCount || 34} frames`;
+
+    if (metaRes) {
+      metaRes.textContent = data.resolution || '1080 × 1080';
+    }
     
     const metaRatio = document.getElementById('meta-ratio');
     if (metaRatio) {
       metaRatio.textContent = data.aspectRatio || (ratioSelect ? ratioSelect.value : '1:1');
     }
 
-    const bytes = typeof data.size === 'number' && !isNaN(data.size) ? data.size : 1080000;
-    const sizeMb = (bytes / (1024 * 1024)).toFixed(2);
-    metaSize.textContent = `${sizeMb} MB`;
+    updateSizeDisplay('gif', data);
+  }
+
+  function updateSizeDisplay(mode, data) {
+    if (mode === 'video' && data.videoSize) {
+      metaSize.textContent = `${(data.videoSize / 1024).toFixed(1)} KB (Video)`;
+    } else {
+      const bytes = typeof data.size === 'number' && !isNaN(data.size) ? data.size : 1751120;
+      const sizeMb = (bytes / (1024 * 1024)).toFixed(2);
+      metaSize.textContent = `${sizeMb} MB (GIF)`;
+    }
   }
 
   planBtn.addEventListener('click', fetchPlan);

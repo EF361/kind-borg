@@ -12,30 +12,50 @@ module.exports = (req, res) => {
     const ratio = body.aspectRatio || '1:1';
 
     let gifUrl = '/outputs/intelligent_curie_1x1.gif';
+    let videoUrl = '/outputs/intelligent_curie_1x1.webm';
     let gifFilename = 'visualproof_1x1_square.gif';
-    let size = 1080000;
-    let frameCount = 49;
+    let videoFilename = 'visualproof_1x1_square.webm';
+    let size = 1751120;
+    let videoSize = 839168;
+    let resolution = '1080 × 1080';
+    let frameCount = 34;
     let durationSec = 17;
 
     if (ratio === '4:5') {
       gifUrl = '/outputs/intelligent_curie_4x5.gif';
+      videoUrl = '/outputs/intelligent_curie_4x5.webm';
       gifFilename = 'visualproof_4x5_portrait.gif';
-      size = 920000;
+      videoFilename = 'visualproof_4x5_portrait.webm';
+      size = 1772140;
+      videoSize = 1092800;
+      resolution = '1080 × 1350';
     } else if (ratio === '1.91:1') {
       gifUrl = '/outputs/intelligent_curie_landscape.gif';
+      videoUrl = '/outputs/intelligent_curie_landscape.webm';
       gifFilename = 'visualproof_1.91x1_landscape.gif';
-      size = 1048000;
+      videoFilename = 'visualproof_1.91x1_landscape.webm';
+      size = 1457660;
+      videoSize = 503600;
+      resolution = '1200 × 627';
     } else if (ratio === 'standard') {
       gifUrl = '/outputs/intelligent_curie.gif';
+      videoUrl = '/outputs/intelligent_curie.webm';
       gifFilename = 'visualproof_standard.gif';
-      size = 1130000;
+      videoFilename = 'visualproof_standard.webm';
+      size = 1457660;
+      videoSize = 538100;
+      resolution = '1080 × 648';
     }
 
     return res.status(200).json({
       success: true,
       gifUrl,
+      videoUrl,
       gifFilename,
+      videoFilename,
       size,
+      videoSize,
+      resolution,
       frameCount,
       durationSec,
       aspectRatio: ratio,
