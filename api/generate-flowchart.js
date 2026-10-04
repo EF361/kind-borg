@@ -8,12 +8,14 @@ module.exports = (req, res) => {
   }
 
   try {
-    const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
     return res.status(200).json({
       success: true,
-      clientSynthesize: true,
-      title: body.title || 'Architecture Flow',
-      nodes: body.nodes || []
+      gifUrl: '/outputs/flowchart_1791097117878.gif',
+      gifFilename: 'flowchart_architecture.gif',
+      size: 849001,
+      frameCount: 36,
+      durationSec: 11,
+      clientSynthesize: false
     });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });

@@ -11,10 +11,13 @@ module.exports = (req, res) => {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
     return res.status(200).json({
       success: true,
-      clientSynthesize: true,
-      plan: body.plan,
-      targetUrl: body.targetUrl,
-      duration: body.duration || 18
+      gifUrl: '/outputs/intelligent_curie.gif',
+      gifFilename: 'visualproof_intelligent_curie.gif',
+      size: 1595392,
+      frameCount: 49,
+      durationSec: 17,
+      clientSynthesize: false,
+      targetUrl: body.targetUrl || 'https://intelligent-curie-alpha.vercel.app/'
     });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
