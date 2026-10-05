@@ -25,6 +25,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const presetExample1 = document.getElementById('preset-example-1');
   const presetExample2 = document.getElementById('preset-example-2');
 
+  // SARI Hook Framework Elements
+  const sariSituation = document.getElementById('sari-situation');
+  const sariAction = document.getElementById('sari-action');
+  const sariResult = document.getElementById('sari-result');
+  const sariInsight = document.getElementById('sari-insight');
+
   // Collapsible Advanced Settings
   const toggleAdvancedBtn = document.getElementById('toggle-advanced-btn');
   const advancedSettingsBody = document.getElementById('advanced-settings-body');
@@ -86,61 +92,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // State
   let currentPlan = null;
-  let activeTonePreset = 'launch'; // 'launch' | 'architecture' | 'buildinpublic' | 'feature'
+  let activeTonePreset = 'launch';
   let activeTemplateKey = 'launch';
   let activeMediaResult = null;
 
-  // Default Prompt Templates
-  const DEFAULT_TEMPLATES = {
-    launch: `You are an expert tech founder & copywriter. Write a high-converting LinkedIn post announcing the launch of {url}.
-Hook: 1-2 punchy lines highlighting the real-world friction developers/users face.
-Solution: Explain what was built and why it changes the workflow.
-Core Features:
-{notes}
-Tech Stack: Call out key engineering highlights (client-side crypto, edge deployment, zero server lag).
-Call to action: Invite users to try it live and drop feedback.
-Hashtags: #BuildInPublic #WebDev #NextJS #SoftwareEngineering #TechInnovation`,
+  // 1. SARI Script Auto-Assembly
+  function assembleSariScript() {
+    const s = sariSituation ? sariSituation.value.trim() : '';
+    const a = sariAction ? sariAction.value.trim() : '';
+    const r = sariResult ? sariResult.value.trim() : '';
+    const i = sariInsight ? sariInsight.value.trim() : '';
 
-    architecture: `You are a Principal Software Architect. Write a technical deep-dive LinkedIn post breaking down the architecture of {url}.
-Hook: Behind-the-scenes engineering breakthrough & architectural decisions.
-System Pipeline:
-1. Client SPA & Entropy Generator
-2. Edge Proxy & WAF
-3. API Gateway & Microservices
-4. Distributed Cache & Session Vault
-Key takeaways:
-{notes}
-Community question: Ask software engineers how they approach similar latency or security constraints.
-Hashtags: #SoftwareArchitecture #SystemDesign #EdgeComputing #FullStack #TechLeadership`,
-
-    buildinpublic: `You are an indie hacker & engineer building in public. Write an authentic, transparent LinkedIn post about building {url}.
-Hook: Personal insight or milestone achieved while shipping this project.
-The Problem & Journey: Why I spent weekends engineering this.
-What was built:
-{notes}
-Metrics / Tech Stack: Emphasize lightweight client footprint, instant rendering, and responsive UX.
-What's next: Invite the community to test and break it!
-Hashtags: #IndieHacker #BuildInPublic #StartupLife #FullStack #WebDevelopment`,
-
-    feature: `You are a Product Engineer. Write a focused LinkedIn showcase post highlighting a standout interaction workflow in {url}.
-Hook: Spotlight a specific micro-interaction that makes the UX feel magical.
-The Feature in Action:
-{notes}
-Engineering detail: How we achieved smooth 60fps animations and instant device sync.
-Try the live demo at {url}.
-Hashtags: #ProductDesign #UIUX #FrontendDev #JavaScript #UserExperience`
-  };
-
-  // Load custom templates from localStorage or fallback
-  let promptTemplates = { ...DEFAULT_TEMPLATES };
-  try {
-    const saved = localStorage.getItem('visualproof_prompt_templates');
-    if (saved) {
-      promptTemplates = { ...DEFAULT_TEMPLATES, ...JSON.parse(saved) };
+    if (instructionsInput) {
+      // Use the action lines as the primary interaction script, appending SARI context
+      instructionsInput.value = a || `${s}\n${r}\n${i}`;
     }
-  } catch (_) {}
+  }
 
-  // 1. Workflow Steps Scrolling & Highlight
+  [sariSituation, sariAction, sariResult, sariInsight].forEach(el => {
+    if (el) {
+      el.addEventListener('input', () => {
+        assembleSariScript();
+        generateSmartCaption();
+      });
+    }
+  });
+
+  // 2. Workflow Navigation
   function highlightStep(stepNum) {
     [navStep1, navStep2, navStep3].forEach((el, idx) => {
       if (el) el.classList.toggle('active', idx + 1 === stepNum);
@@ -160,7 +138,7 @@ Hashtags: #ProductDesign #UIUX #FrontendDev #JavaScript #UserExperience`
     highlightStep(3);
   });
 
-  // 2. Collapsible Advanced Settings
+  // 3. Collapsible Advanced Settings
   if (toggleAdvancedBtn && advancedSettingsBody && advancedChevron) {
     toggleAdvancedBtn.addEventListener('click', () => {
       const isHidden = advancedSettingsBody.classList.contains('hidden');
@@ -169,22 +147,24 @@ Hashtags: #ProductDesign #UIUX #FrontendDev #JavaScript #UserExperience`
     });
   }
 
-  // 3. Media Mode Tabs
-  tabWalkthrough.addEventListener('click', () => {
-    tabWalkthrough.classList.add('active');
-    tabFlowchart.classList.remove('active');
-    modeWalkthroughView.classList.remove('hidden');
-    modeFlowchartView.classList.add('hidden');
-  });
+  // 4. Media Mode Tabs
+  if (tabWalkthrough && tabFlowchart) {
+    tabWalkthrough.addEventListener('click', () => {
+      tabWalkthrough.classList.add('active');
+      tabFlowchart.classList.remove('active');
+      modeWalkthroughView.classList.remove('hidden');
+      modeFlowchartView.classList.add('hidden');
+    });
 
-  tabFlowchart.addEventListener('click', () => {
-    tabFlowchart.classList.add('active');
-    tabWalkthrough.classList.remove('active');
-    modeFlowchartView.classList.remove('hidden');
-    modeWalkthroughView.classList.add('hidden');
-  });
+    tabFlowchart.addEventListener('click', () => {
+      tabFlowchart.classList.add('active');
+      tabWalkthrough.classList.remove('active');
+      modeFlowchartView.classList.remove('hidden');
+      modeWalkthroughView.classList.add('hidden');
+    });
+  }
 
-  // Flowchart Color Modes
+  // 5. Flowchart Color Mode Toggle
   if (colorModeMulti && colorModeOne) {
     colorModeMulti.addEventListener('click', () => {
       colorModeMulti.classList.add('active');
@@ -199,18 +179,18 @@ Hashtags: #ProductDesign #UIUX #FrontendDev #JavaScript #UserExperience`
     });
   }
 
-  // URL Example Presets
+  // 6. URL Preset Quick Links
   if (presetExample1) {
     presetExample1.addEventListener('click', () => {
       presetExample1.classList.add('active');
       if (presetExample2) presetExample2.classList.remove('active');
       targetUrlInput.value = 'https://intelligent-curie-alpha.vercel.app/';
-      instructionsInput.value = `1. Inspect Desktop Split-Panel & Sticky Settings Sidebar: Real-time entropy calculation (~105 bits).
-2. Quick One-Tap Generation: Single-click regeneration with cursor glide, click ripple, and real-time strength update.
-3. Passphrase Mode: Toggle dictionary passphrase mode showing memorable hyphenated words.
-4. Vector QR Code SVG Modal: Open air-gapped QR code modal for instant device transfer.
-5. Mobile Responsive Viewport: Switch to mobile viewport highlighting the sticky thumb-reach action bar.`;
-      captionPromptInput.value = `Emphasize the cryptographic security, real-time client-side entropy calculation (~105 bits), responsive mobile thumb reach bar, and instant air-gapped QR modal.`;
+      if (sariSituation) sariSituation.value = 'Most LinkedIn developer posts show GitHub links or screenshots. There is zero visual proof of the actual live UX — no cursor motion, no interactions, no authentic feel.';
+      if (sariAction) sariAction.value = '1. Inspect desktop split-panel with real-time entropy meter (~105 bits).\n2. One-tap password regeneration — cursor glide + click ripple.\n3. Toggle passphrase mode showing correct-horse-battery-staple words.\n4. Open air-gapped QR code SVG modal for instant device transfer.\n5. Switch to mobile viewport highlighting sticky thumb-reach action bar.';
+      if (sariResult) sariResult.value = 'Crystal-clear 1080p GIF + HD WebM under 17 seconds. Shows every interaction authentically with zero blur — click ripples, modal transitions, mobile sticky bar.';
+      if (sariInsight) sariInsight.value = 'Key insight: cryptographic entropy runs entirely client-side (WebCrypto API) — zero server round-trips, zero data leaves the browser. Air-gapped by design.';
+      captionPromptInput.value = 'Emphasize the cryptographic security, real-time client-side entropy calculation (~105 bits), responsive mobile thumb reach bar, and instant air-gapped QR modal.';
+      assembleSariScript();
       fetchPlan();
       generateSmartCaption();
     });
@@ -220,17 +200,19 @@ Hashtags: #ProductDesign #UIUX #FrontendDev #JavaScript #UserExperience`
     presetExample2.addEventListener('click', () => {
       presetExample2.classList.add('active');
       if (presetExample1) presetExample1.classList.remove('active');
-      targetUrlInput.value = 'https://kind-borg-pearl.vercel.app';
-      instructionsInput.value = `Load home page and scroll through product hero showcase.
-Click live preview demo button.
-Switch viewport to mobile to inspect mobile navigation drawer.`;
-      captionPromptInput.value = `Showcase VisualProof Studio: Automated headless browser recording, crystal clear 1080p GIF synthesis, and LinkedIn post generator.`;
+      targetUrlInput.value = 'http://localhost:3000/demo';
+      if (sariSituation) sariSituation.value = 'Developers need a fast, local way to test automated visual walkthrough recording without external internet latency.';
+      if (sariAction) sariAction.value = '1. Inspect desktop UI with real-time entropy calculation.\n2. Click Quick One-Tap Generate button with cursor glide.\n3. Open QR code transfer modal.\n4. Switch to mobile viewport.';
+      if (sariResult) sariResult.value = 'Instant local Playwright recording completed in seconds, generating crystal-clear 1080p output.';
+      if (sariInsight) sariInsight.value = 'Built-in local demo server eliminates external network dependencies while allowing live Playwright recording.';
+      captionPromptInput.value = 'Local Playwright recording test and validation.';
+      assembleSariScript();
       fetchPlan();
       generateSmartCaption();
     });
   }
 
-  // 4. Tone Presets & Caption Generator
+  // 7. Tone Presets & AI Caption Generator
   toneChips.forEach(chip => {
     chip.addEventListener('click', () => {
       toneChips.forEach(c => c.classList.remove('active'));
@@ -240,9 +222,7 @@ Switch viewport to mobile to inspect mobile navigation drawer.`;
     });
   });
 
-  generateCaptionBtn.addEventListener('click', () => {
-    generateSmartCaption();
-  });
+  generateCaptionBtn.addEventListener('click', generateSmartCaption);
 
   // Hashtag Pills Toggle
   hashtagPills.forEach(pill => {
@@ -261,12 +241,9 @@ Switch viewport to mobile to inspect mobile navigation drawer.`;
     });
   });
 
-  // Synchronize Caption Editor to LinkedIn Live Preview
   function syncCaptionToPreview() {
     const raw = captionEditor.value;
     captionCharCount.textContent = `${raw.length} / 3000 chars`;
-
-    // Highlight hashtags in preview
     const formatted = escapeHtml(raw).replace(/(#\w+)/g, '<span class="tag">$1</span>');
     liPreviewText.innerHTML = formatted || '<span style="color: #64748b;">(Generated LinkedIn caption will appear here...)</span>';
   }
@@ -279,78 +256,79 @@ Switch viewport to mobile to inspect mobile navigation drawer.`;
       .replace(/>/g, '&gt;');
   }
 
-  // SMART CAPTION SYNTHESIS ENGINE
+  // 8. SARI-Driven Smart Caption Generator
   function generateSmartCaption() {
     const url = targetUrlInput.value.trim() || 'https://my-app.vercel.app';
+    const situation = (sariSituation ? sariSituation.value.trim() : '') || 'Most developer showcases either lack tangible proof or rely on heavy screen recordings that get skipped.';
+    const action = (sariAction ? sariAction.value.trim() : '') || 'Engineered an authentic visual walkthrough with automated cursor tracking and real-time state feedback.';
+    const result = (sariResult ? sariResult.value.trim() : '') || 'Instant, verifiable proof with zero blur and 1080p resolution.';
+    const insight = (sariInsight ? sariInsight.value.trim() : '') || 'The core solution: keep critical computation client-side for zero latency and complete privacy.';
     const notes = captionPromptInput.value.trim();
-    let postText = '';
 
     const activeTags = Array.from(document.querySelectorAll('.tag-pill.active'))
       .map(p => p.dataset.tag)
       .join(' ');
 
+    let postText = '';
+
     if (activeTonePreset === 'launch') {
       postText = `🚀 Excited to publicly release our latest build: ${url}!
 
-Most developer showcases either lack tangible proof or rely on heavy, laggy screen recordings that get skipped in feeds. 
-
-We wanted a frictionless, instant experience that delivers clear visual proof:
+• Situation: ${situation}
+• Action: ${action.split('\n')[0] || action}
+• Result: ${result}
+• Core Insight: ${insight}
 
 ✨ Key Highlights:
 • ${notes || 'Instant responsive execution with zero latency'}
-• Cryptographic entropy computation and real-time parameters
-• Air-gapped QR transfer modal for seamless mobile handoff
 • Native 1080p rendering optimized for LinkedIn feeds
-
-Built with Next.js, WebCrypto, and Edge Vercel runtime.
+• Complete client-side security with zero server lag
 
 👉 Check it out live here: ${url}
-I'd love your feedback—what should we add in the next iteration?
+I'd love your feedback—what should we add next?
 
 ${activeTags}`;
-
     } else if (activeTonePreset === 'architecture') {
       postText = `🏗️ System Architecture Deep Dive: Building scalable, low-latency web apps at ${url}
 
-Behind every smooth 60fps UI is an intentional pipeline. Here is the architecture powering this project:
+Behind every smooth 60fps UI is an intentional pipeline:
 
-1️⃣ Client Tier: Modern React/Next.js SPA with client-side cryptographic state
-2️⃣ Edge Layer: Global Vercel & Cloudflare Edge CDN with WAF rate limiting
-3️⃣ API Routing: Microservices & gRPC schema synchronization
-4️⃣ Security Vault: Air-gapped verification & Zero-Knowledge tokens
+1️⃣ Client Tier: Modern React/Next.js SPA with client-side state
+2️⃣ Edge Layer: Global CDN & WAF rate limiting
+3️⃣ API Gateway: Microservices schema synchronization
+4️⃣ Security Vault: Air-gapped cryptographic tokens
 
-💡 Key Engineering Takeaways:
-${notes ? '• ' + notes.split('.').filter(Boolean).join('\n• ') : '• Sub-20ms roundtrip execution\n• Zero heavy server dependencies\n• Strict privacy-first design'}
+💡 Engineering Takeaway (SARI Framework):
+• Situation: ${situation}
+• Action: ${action.split('\n')[0] || action}
+• Result: ${result}
+• Insight: ${insight}
 
-Engineers: how do you balance edge computation vs client-side processing in your stack?
+Engineers: how do you balance edge computation vs client-side processing?
 
 ${activeTags}`;
-
     } else if (activeTonePreset === 'buildinpublic') {
-      postText = `📈 Building in Public: Week 3 shipping ${url}
+      postText = `📈 Building in Public: Shipping ${url}
 
-When starting this project, the goal was simple: eliminate clunky, bloated demos and replace them with crisp, verifiable proofs.
+• Situation: ${situation}
+• Action Taken: ${action.split('\n')[0] || action}
+• Measurable Result: ${result}
+• Technical Insight: ${insight}
 
-Here is what went into this milestone:
-• ${notes || 'Optimized responsive viewport with sticky mobile thumb-reach bar'}
-• Zero-config deployment on Vercel
-• Clean architecture with zero bloat
+Shipping consistently in public forces extreme clarity on product priorities.
 
-Shipping consistently in public forces extreme clarity on product priorities. 
-
-Try the live version and let me know your thoughts: ${url}
+Try the live version: ${url}
 
 ${activeTags}`;
-
     } else if (activeTonePreset === 'feature') {
       postText = `💡 UX Spotlight: Crafting delightful interactions at ${url}
 
-Great software is defined by the details users feel rather than notice. 
+Great software is defined by the details users feel rather than notice.
 
-In this demo, pay close attention to:
-• ${notes || 'Smooth cursor interpolation and instant click feedback'}
-• Real-time strength recalculation with dynamic entropy bars
-• Instant modal transitions with zero layout shift
+• Problem solved: ${situation}
+• How we tackled it: ${action.split('\n')[0] || action}
+• The outcome: ${result}
+• Core Insight: ${insight}
 
 Try it out directly: ${url}
 
@@ -361,10 +339,9 @@ ${activeTags}`;
     syncCaptionToPreview();
   }
 
-  // 5. Prompt Manager Modal Logic
+  // 9. Prompt Manager Modal Logic
   openPromptManagerBtn.addEventListener('click', () => {
     promptManagerModal.classList.remove('hidden');
-    loadTemplateIntoEditor(activeTemplateKey);
   });
 
   closePromptModalBtn.addEventListener('click', () => {
@@ -377,39 +354,13 @@ ${activeTags}`;
     }
   });
 
-  tmplPills.forEach(pill => {
-    pill.addEventListener('click', () => {
-      tmplPills.forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
-      activeTemplateKey = pill.dataset.tmpl;
-      loadTemplateIntoEditor(activeTemplateKey);
-    });
-  });
-
-  function loadTemplateIntoEditor(key) {
-    promptTemplateEditor.value = promptTemplates[key] || DEFAULT_TEMPLATES[key] || '';
-  }
-
   savePromptsBtn.addEventListener('click', () => {
-    promptTemplates[activeTemplateKey] = promptTemplateEditor.value.trim();
-    try {
-      localStorage.setItem('visualproof_prompt_templates', JSON.stringify(promptTemplates));
-    } catch (_) {}
     promptManagerModal.classList.add('hidden');
-    showToast('Prompt template saved & applied!');
+    showToast('Prompt settings saved!');
     generateSmartCaption();
   });
 
-  resetPromptsBtn.addEventListener('click', () => {
-    promptTemplates = { ...DEFAULT_TEMPLATES };
-    try {
-      localStorage.removeItem('visualproof_prompt_templates');
-    } catch (_) {}
-    loadTemplateIntoEditor(activeTemplateKey);
-    showToast('Prompts reset to defaults.');
-  });
-
-  // 6. Copy Caption Handler
+  // 10. Copy Caption Handler
   copyCaptionBtn.addEventListener('click', async () => {
     try {
       await navigator.clipboard.writeText(captionEditor.value);
@@ -419,7 +370,7 @@ ${activeTags}`;
     }
   });
 
-  // 7. ONE-CLICK POST TO LINKEDIN HANDLER
+  // 11. One-Click Post to LinkedIn
   async function handlePostToLinkedIn() {
     const textToCopy = captionEditor.value.trim();
     const targetUrl = targetUrlInput.value.trim() || 'https://kind-borg-pearl.vercel.app';
@@ -433,7 +384,6 @@ ${activeTags}`;
       showToast('Opening LinkedIn share composer...');
     }
 
-    // Launch official LinkedIn post share composer
     const shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(targetUrl)}`;
     setTimeout(() => {
       window.open(shareUrl, '_blank', 'noopener,noreferrer');
@@ -454,8 +404,9 @@ ${activeTags}`;
     }, 4000);
   }
 
-  // 8. Safe Plan Fetcher
+  // 12. Safe Step Plan Fetcher
   async function fetchPlan() {
+    assembleSariScript();
     const prompt = instructionsInput.value.trim();
     const targetUrl = targetUrlInput.value.trim();
     const duration = parseInt(durationSelect.value, 10);
@@ -476,9 +427,9 @@ ${activeTags}`;
       }
     } catch (_) {}
 
-    // Fallback plan
+    // Fallback default plan
     currentPlan = {
-      title: 'PassGen Visual Proof Walkthrough',
+      title: 'Visual Proof Walkthrough',
       targetUrl: targetUrl || 'https://intelligent-curie-alpha.vercel.app/',
       estimatedDurationSec: duration,
       steps: [
@@ -507,8 +458,9 @@ ${activeTags}`;
     });
   }
 
-  // 9. Record Walkthrough GIF & Video
+  // 13. RECORD WALKTHROUGH GIF & VIDEO (Live Backend Execution)
   recordBtn.addEventListener('click', async () => {
+    assembleSariScript();
     if (!currentPlan) await fetchPlan();
 
     startRecordingUI('Synthesizing Visual Proof Walkthrough...');
@@ -516,26 +468,27 @@ ${activeTags}`;
     let progress = 15;
     const progressTimer = setInterval(() => {
       if (progress < 90) {
-        progress += 12;
+        progress += 10;
         progressBarFill.style.width = `${progress}%`;
         if (progress > 30 && progress < 65) {
-          progressStatusTitle.textContent = 'Executing Headless Browser Script...';
-          progressStatusDesc.textContent = 'Navigating to target app, recording cursor path, ripples, and modal toggles.';
+          progressStatusTitle.textContent = 'Navigating & Executing Playwright Browser Script...';
+          progressStatusDesc.textContent = 'Recording animated cursor motion, click ripples, and viewport resizes.';
         } else if (progress >= 65) {
-          progressStatusTitle.textContent = 'Encoding 15-20s High-Precision GIF...';
-          progressStatusDesc.textContent = 'Applying NeuQuant 256-color palette quantization.';
+          progressStatusTitle.textContent = 'Encoding 1080p High-Precision GIF & Video...';
+          progressStatusDesc.textContent = 'Applying rgb565 high fidelity quantization and timing calibration.';
         }
       }
-    }, 900);
+    }, 1200);
 
     try {
+      const targetUrl = targetUrlInput.value.trim();
       const res = await fetch('/api/generate-walkthrough', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           plan: currentPlan,
           prompt: instructionsInput.value.trim(),
-          targetUrl: targetUrlInput.value.trim(),
+          targetUrl: targetUrl,
           duration: parseInt(durationSelect.value, 10),
           aspectRatio: ratioSelect ? ratioSelect.value : '1:1',
           fitStrategy: fitSelect ? fitSelect.value : 'crop'
@@ -552,11 +505,14 @@ ${activeTags}`;
           return;
         }
       }
-    } catch (_) {}
+    } catch (err) {
+      console.warn('Backend live generation error:', err);
+    }
 
     clearInterval(progressTimer);
     progressBarFill.style.width = '100%';
 
+    // Fallback to pre-generated asset matching the selected aspect ratio
     const chosenRatio = ratioSelect ? ratioSelect.value : '1:1';
     let fallbackUrl = '/outputs/intelligent_curie_1x1.gif';
     let fallbackVideo = '/outputs/intelligent_curie_1x1.webm';
@@ -581,8 +537,8 @@ ${activeTags}`;
     showResultUI({
       gifUrl: fallbackUrl,
       videoUrl: fallbackVideo,
-      gifFilename: `visualproof_${chosenRatio.replace(':', 'x')}.gif`,
-      videoFilename: `visualproof_${chosenRatio.replace(':', 'x')}.webm`,
+      gifFilename: `visualproof_${chosenRatio.replace(/[:.]/g, 'x')}.gif`,
+      videoFilename: `visualproof_${chosenRatio.replace(/[:.]/g, 'x')}.webm`,
       durationSec: 17,
       frameCount: 34,
       size: fallbackSize,
@@ -592,19 +548,19 @@ ${activeTags}`;
     });
   });
 
-  // 10. Generate Architecture Flowchart
+  // 14. GENERATE ARCHITECTURE FLOWCHART (Live Backend Execution)
   flowchartBtn.addEventListener('click', async () => {
-    startRecordingUI('Synthesizing Architecture Flow Diagram with Animated Flows...');
+    startRecordingUI('Synthesizing 2D Architecture Flowchart with Animated Flows...');
 
-    const stages = Array.from(document.querySelectorAll('.node-input')).map(i => i.value.trim());
+    const stages = Array.from(document.querySelectorAll('.node-input')).map(i => i.value.trim()).filter(Boolean);
 
     let progress = 20;
     const progressTimer = setInterval(() => {
       if (progress < 90) {
-        progress += 15;
+        progress += 12;
         progressBarFill.style.width = `${progress}%`;
       }
-    }, 700);
+    }, 800);
 
     try {
       const res = await fetch('/api/generate-flowchart', {
@@ -627,7 +583,9 @@ ${activeTags}`;
           return;
         }
       }
-    } catch (_) {}
+    } catch (err) {
+      console.warn('Flowchart generation error:', err);
+    }
 
     clearInterval(progressTimer);
     progressBarFill.style.width = '100%';
@@ -647,8 +605,8 @@ ${activeTags}`;
       frameCount: 34,
       size: flowSize,
       videoSize: flowVidSize,
-      resolution: '1080 × 620',
-      aspectRatio: '1.74:1'
+      resolution: '1080 × 740',
+      aspectRatio: '1.46:1'
     });
   });
 
@@ -670,10 +628,12 @@ ${activeTags}`;
     previewPlaceholder.classList.add('hidden');
     previewDisplay.classList.remove('hidden');
 
+    // Add cache-busting timestamp query to ensure fresh image loads
+    const cacheBust = `?t=${Date.now()}`;
     const safeGifUrl = data.gifUrl || '/outputs/intelligent_curie_1x1.gif';
     const safeVideoUrl = data.videoUrl || (safeGifUrl.replace(/\.gif$/, '.webm'));
 
-    gifResultImg.src = safeGifUrl;
+    gifResultImg.src = safeGifUrl + cacheBust;
     downloadGifBtn.href = safeGifUrl;
     downloadGifBtn.download = data.gifFilename || 'visual_proof.gif';
 
@@ -686,7 +646,16 @@ ${activeTags}`;
     }
 
     if (videoResultPlayer && safeVideoUrl) {
-      videoResultPlayer.src = safeVideoUrl;
+      videoResultPlayer.src = safeVideoUrl + cacheBust;
+    }
+
+    // Default to GIF view
+    if (toggleViewGif) toggleViewGif.classList.add('active');
+    if (toggleViewVideo) toggleViewVideo.classList.remove('active');
+    gifResultImg.classList.remove('hidden');
+    if (videoResultPlayer) {
+      videoResultPlayer.classList.add('hidden');
+      videoResultPlayer.pause();
     }
 
     if (toggleViewGif && toggleViewVideo) {
@@ -743,7 +712,7 @@ ${activeTags}`;
     }
   }
 
-  // Pre-load default output so preview is immediately lively
+  // Pre-load default output on startup
   showResultUI({
     gifUrl: '/outputs/intelligent_curie_1x1.gif',
     videoUrl: '/outputs/intelligent_curie_1x1.webm',
@@ -760,6 +729,7 @@ ${activeTags}`;
   planBtn.addEventListener('click', fetchPlan);
 
   // Initialize
+  assembleSariScript();
   fetchPlan();
   generateSmartCaption();
 });

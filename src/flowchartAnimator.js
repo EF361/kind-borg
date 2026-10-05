@@ -5,9 +5,10 @@ const { encodeGifFromPngFrames } = require('./gifEncoder');
 const { resolveTechIcon } = require('./techIcons');
 
 /**
- * Renders and animates a clean, minimalistic architecture flowchart step-by-step.
- * Inspired by modern terminal-to-cloud diagrams with authentic tech stack SVG icons.
- * Supports 'multicolor' (brand accents) and 'onecolor' (minimalist electric blue).
+ * Renders and animates a clean, minimalistic 2D architecture flowchart.
+ * Directly based on the reference design:
+ * Start circle -> Pill 1 -> Diamond 1 -> Pill 2 -> Diamond 2 -> Pill 3 -> Pill 4/Diamond 3 -> End circle
+ * Supports 'multicolor' (tech brand accents) and 'onecolor' (minimalist electric blue).
  */
 async function generateFlowchartGif(options = {}) {
   const outputDir = options.outputDir || path.join(__dirname, 'outputs');
@@ -47,8 +48,9 @@ async function generateFlowchartGif(options = {}) {
     };
   });
 
+  // Canvas size: clean 1080 x 740 for spacious 2D layout
   const width = 1080;
-  const height = 620;
+  const height = 740;
 
   const browser = await chromium.launch({
     headless: true,
@@ -80,7 +82,7 @@ async function generateFlowchartGif(options = {}) {
           body {
             width: ${width}px;
             height: ${height}px;
-            background: #080c16;
+            background: #090d16;
             color: #f1f5f9;
             font-family: 'Plus Jakarta Sans', sans-serif;
             display: flex;
@@ -96,16 +98,16 @@ async function generateFlowchartGif(options = {}) {
             position: absolute;
             inset: 0;
             background-image: 
-              radial-gradient(circle at 50% 15%, rgba(59, 130, 246, 0.08) 0%, transparent 60%),
-              linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-            background-size: 100% 100%, 40px 40px, 40px 40px;
+              radial-gradient(circle at 50% 25%, rgba(59, 130, 246, 0.07) 0%, transparent 65%),
+              linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+            background-size: 100% 100%, 36px 36px, 36px 36px;
             pointer-events: none;
           }
 
           /* Header */
           .header-bar {
-            padding: 22px 42px 14px 42px;
+            padding: 20px 42px 14px 42px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -138,7 +140,7 @@ async function generateFlowchartGif(options = {}) {
             font-family: 'JetBrains Mono', monospace;
             font-size: 11px;
             font-weight: 700;
-            background: rgba(15, 23, 42, 0.8);
+            background: rgba(15, 23, 42, 0.85);
             color: ${defaultAccent};
             padding: 5px 14px;
             border-radius: 9999px;
@@ -146,14 +148,10 @@ async function generateFlowchartGif(options = {}) {
             letter-spacing: 0.04em;
           }
 
-          /* Main Flow Canvas */
+          /* 2D Canvas Flow */
           .canvas-flow {
             flex: 1;
             position: relative;
-            padding: 24px 36px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
             z-index: 10;
           }
 
@@ -170,8 +168,8 @@ async function generateFlowchartGif(options = {}) {
             to { stroke-dashoffset: -24; }
           }
           .flow-line {
-            stroke: #334155;
-            stroke-width: 2.8;
+            stroke: #2e3e55;
+            stroke-width: 2.5;
             fill: none;
             stroke-dasharray: 6 4;
             transition: stroke 0.3s ease;
@@ -191,27 +189,28 @@ async function generateFlowchartGif(options = {}) {
             border-radius: 50%;
             background: ${defaultAccent};
             box-shadow: 0 0 16px ${defaultAccent}, 0 0 8px #ffffff;
-            z-index: 20;
+            z-index: 25;
             opacity: 0;
             transform: translate(-50%, -50%);
             transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
           }
 
-          /* Node 1: Start Terminal */
+          /* Circular Terminals: Start & End */
           .node-terminal {
-            width: 72px;
-            height: 72px;
+            width: 78px;
+            height: 78px;
             border-radius: 50%;
             background: #111827;
-            border: 2px solid #334155;
+            border: 2.2px solid #3b82f6;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.5);
-            position: relative;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            position: absolute;
             z-index: 15;
             transition: all 0.35s ease;
+            transform: translate(-50%, -50%);
           }
           .node-terminal.start {
             border-color: #3b82f6;
@@ -219,16 +218,20 @@ async function generateFlowchartGif(options = {}) {
           }
           .node-terminal.start.active {
             border-color: #60a5fa;
-            box-shadow: 0 0 24px rgba(59, 130, 246, 0.5);
-            transform: scale(1.08);
+            box-shadow: 0 0 28px rgba(59, 130, 246, 0.6);
+            transform: translate(-50%, -50%) scale(1.08);
+          }
+          .node-terminal.end {
+            border-color: #10b981;
+            background: #0b1f1c;
           }
           .node-terminal.end.active {
-            border-color: #10b981;
-            box-shadow: 0 0 24px rgba(16, 185, 129, 0.5);
-            transform: scale(1.08);
+            border-color: #34d399;
+            box-shadow: 0 0 28px rgba(16, 185, 129, 0.6);
+            transform: translate(-50%, -50%) scale(1.08);
           }
           .terminal-label {
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 800;
             letter-spacing: 0.05em;
             text-transform: uppercase;
@@ -241,50 +244,50 @@ async function generateFlowchartGif(options = {}) {
             color: #94a3b8;
           }
 
-          /* Process Stadium Pill Nodes */
+          /* Rounded Stadium / Pill Nodes */
           .node-pill {
-            width: 152px;
+            width: 170px;
             background: #0f172a;
-            border: 1.8px solid #24344d;
-            border-radius: 24px;
-            padding: 14px 12px 12px 12px;
+            border: 2px solid #24344d;
+            border-radius: 26px;
+            padding: 12px 14px 10px 14px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            position: relative;
+            position: absolute;
             z-index: 15;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+            transform: translate(-50%, -50%);
             transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
           }
           .node-pill.active {
             border-color: var(--accent);
-            transform: translateY(-8px) scale(1.05);
-            box-shadow: 0 14px 32px rgba(0,0,0,0.6), 0 0 20px var(--glow);
+            transform: translate(-50%, -50%) scale(1.06);
+            box-shadow: 0 14px 32px rgba(0,0,0,0.65), 0 0 22px var(--glow);
             background: #141e33;
           }
 
-          /* Tech Icon inside node */
           .tech-icon-frame {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
             background: rgba(255,255,255,0.04);
             border: 1px solid rgba(255,255,255,0.08);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             color: var(--accent);
             transition: all 0.3s ease;
           }
           .node-pill.active .tech-icon-frame {
             background: rgba(255,255,255,0.08);
             border-color: var(--accent);
-            box-shadow: 0 0 14px var(--glow);
+            box-shadow: 0 0 12px var(--glow);
           }
           .tech-icon-frame svg {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
           }
 
           .node-name {
@@ -292,8 +295,8 @@ async function generateFlowchartGif(options = {}) {
             font-weight: 700;
             color: #ffffff;
             text-align: center;
-            line-height: 1.25;
-            margin-bottom: 4px;
+            line-height: 1.2;
+            margin-bottom: 3px;
           }
           .node-subtext {
             font-family: 'JetBrains Mono', monospace;
@@ -301,12 +304,12 @@ async function generateFlowchartGif(options = {}) {
             font-weight: 600;
             color: #94a3b8;
             text-align: center;
-            margin-bottom: 8px;
+            margin-bottom: 7px;
           }
 
-          /* Minimalist inner stadium indicator bar (matches reference design) */
+          /* Inner stadium bar (matches reference design!) */
           .inner-pill-bar {
-            width: 54px;
+            width: 60px;
             height: 6px;
             border-radius: 9999px;
             background: #24344d;
@@ -317,23 +320,24 @@ async function generateFlowchartGif(options = {}) {
             box-shadow: 0 0 8px var(--accent);
           }
 
-          /* Decision Diamond Node */
+          /* Decision Diamond Nodes */
           .node-diamond-wrapper {
-            width: 76px;
-            height: 76px;
+            width: 78px;
+            height: 78px;
+            position: absolute;
+            z-index: 15;
+            transform: translate(-50%, -50%);
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
-            z-index: 15;
           }
           .diamond-card {
-            width: 64px;
-            height: 64px;
+            width: 66px;
+            height: 66px;
             background: #0f172a;
-            border: 1.8px solid #24344d;
+            border: 2px solid #24344d;
             transform: rotate(45deg);
-            border-radius: 8px;
+            border-radius: 9px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -365,7 +369,7 @@ async function generateFlowchartGif(options = {}) {
             line-height: 1.1;
           }
 
-          /* Bottom Timeline & Protocol Status Bar */
+          /* Status Bar */
           .status-bar {
             height: 52px;
             background: #0a0f1d;
@@ -429,56 +433,71 @@ async function generateFlowchartGif(options = {}) {
         </div>
 
         <div class="canvas-flow" id="flow-canvas">
-          <!-- Start Terminal -->
-          <div class="node-terminal start active" id="terminal-start">
+          <!-- Row 1: Start (170, 95), Pill 1 (540, 95), Diamond 1 (900, 95) -->
+          <div class="node-terminal start active" id="terminal-start" style="left: 170px; top: 95px;">
             <div class="terminal-label">START</div>
             <div class="terminal-sub">CLIENT</div>
           </div>
 
-          <!-- Stage 1 Pill -->
-          <div class="node-pill" id="stage-node-0" style="--accent: ${stages[0].color}; --glow: ${stages[0].color}44;">
+          <div class="node-pill" id="stage-node-0" style="left: 540px; top: 95px; --accent: ${stages[0].color}; --glow: ${stages[0].color}44;">
             <div class="tech-icon-frame">${stages[0].iconSvg}</div>
             <div class="node-name">${stages[0].label}</div>
             <div class="node-subtext">${stages[0].subLabel}</div>
             <div class="inner-pill-bar"></div>
           </div>
 
-          <!-- Stage 2 Pill -->
-          <div class="node-pill" id="stage-node-1" style="--accent: ${stages[1].color}; --glow: ${stages[1].color}44;">
+          <div class="node-diamond-wrapper" id="diamond-node-1" style="left: 900px; top: 95px;">
+            <div class="diamond-card">
+              <div class="diamond-content">
+                <span class="diamond-icon">◇</span>
+                <span class="diamond-label">WAF &amp; EDGE</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 2: Diamond 2 (540, 260), Pill 2 (900, 260) -->
+          <div class="node-pill" id="stage-node-1" style="left: 900px; top: 260px; --accent: ${stages[1].color}; --glow: ${stages[1].color}44;">
             <div class="tech-icon-frame">${stages[1].iconSvg}</div>
             <div class="node-name">${stages[1].label}</div>
             <div class="node-subtext">${stages[1].subLabel}</div>
             <div class="inner-pill-bar"></div>
           </div>
 
-          <!-- Decision Diamond (WAF / Auth Check) -->
-          <div class="node-diamond-wrapper" id="diamond-node">
+          <div class="node-diamond-wrapper" id="diamond-node-2" style="left: 540px; top: 260px;">
             <div class="diamond-card">
               <div class="diamond-content">
                 <span class="diamond-icon">◇</span>
-                <span class="diamond-label">WAF & AUTH</span>
+                <span class="diamond-label">AUTH TOKEN</span>
               </div>
             </div>
           </div>
 
-          <!-- Stage 3 Pill -->
-          <div class="node-pill" id="stage-node-2" style="--accent: ${stages[2].color}; --glow: ${stages[2].color}44;">
+          <!-- Row 3: Pill 4 (170, 425), Pill 3 (540, 425), Diamond 3 (900, 425) -->
+          <div class="node-pill" id="stage-node-3" style="left: 170px; top: 425px; --accent: ${stages[3].color}; --glow: ${stages[3].color}44;">
+            <div class="tech-icon-frame">${stages[3].iconSvg}</div>
+            <div class="node-name">${stages[3].label}</div>
+            <div class="node-subtext">${stages[3].subLabel}</div>
+            <div class="inner-pill-bar"></div>
+          </div>
+
+          <div class="node-pill" id="stage-node-2" style="left: 540px; top: 425px; --accent: ${stages[2].color}; --glow: ${stages[2].color}44;">
             <div class="tech-icon-frame">${stages[2].iconSvg}</div>
             <div class="node-name">${stages[2].label}</div>
             <div class="node-subtext">${stages[2].subLabel}</div>
             <div class="inner-pill-bar"></div>
           </div>
 
-          <!-- Stage 4/5 Combined DB & Vault Pill -->
-          <div class="node-pill" id="stage-node-3" style="--accent: ${stages[4] ? stages[4].color : stages[3].color}; --glow: ${(stages[4] ? stages[4].color : stages[3].color)}44;">
-            <div class="tech-icon-frame">${stages[4] ? stages[4].iconSvg : stages[3].iconSvg}</div>
-            <div class="node-name">${stages[4] ? stages[4].label : stages[3].label}</div>
-            <div class="node-subtext">${stages[4] ? stages[4].subLabel : stages[3].subLabel}</div>
-            <div class="inner-pill-bar"></div>
+          <div class="node-diamond-wrapper" id="diamond-node-3" style="left: 900px; top: 425px;">
+            <div class="diamond-card">
+              <div class="diamond-content">
+                <span class="diamond-icon">◇</span>
+                <span class="diamond-label">${stages[4] ? stages[4].label : 'DATA TX'}</span>
+              </div>
+            </div>
           </div>
 
-          <!-- End Terminal -->
-          <div class="node-terminal end" id="terminal-end">
+          <!-- Row 4: End terminal (900, 560) -->
+          <div class="node-terminal end" id="terminal-end" style="left: 900px; top: 560px;">
             <div class="terminal-label">END</div>
             <div class="terminal-sub">200 OK</div>
           </div>
@@ -490,7 +509,7 @@ async function generateFlowchartGif(options = {}) {
                 <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="${defaultAccent}"/>
               </marker>
               <marker id="arrow-dim" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#334155"/>
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#2e3e55"/>
               </marker>
             </defs>
           </svg>
@@ -511,73 +530,129 @@ async function generateFlowchartGif(options = {}) {
     `;
 
     await page.setContent(htmlContent);
-    await page.waitForTimeout(400);
+    await page.waitForTimeout(300);
 
-    // Draw SVG connector lines bridging all sequential nodes with directional arrows
+    // Draw SVG connector lines based on 2D snake geometry from reference image
     await page.evaluate(() => {
-      const nodeIds = [
-        'terminal-start',
-        'stage-node-0',
-        'stage-node-1',
-        'diamond-node',
-        'stage-node-2',
-        'stage-node-3',
-        'terminal-end'
-      ];
       const svg = document.getElementById('connector-svg');
       if (!svg) return;
 
-      for (let i = 0; i < nodeIds.length - 1; i++) {
-        const fromEl = document.getElementById(nodeIds[i]);
-        const toEl = document.getElementById(nodeIds[i + 1]);
-        if (!fromEl || !toEl) continue;
+      // Lines definition based on reference layout:
+      // Line 0: Start (170, 95) -> Pill 1 (540, 95) (Horizontal Right)
+      // Line 1: Pill 1 (540, 95) -> Diamond 1 (900, 95) (Horizontal Right)
+      // Line 2: Diamond 1 (900, 95) -> Pill 2 (900, 260) (Vertical Down)
+      // Line 3: Pill 2 (900, 260) -> Diamond 2 (540, 260) (Horizontal Left)
+      // Line 4: Diamond 2 (540, 260) -> Pill 3 (540, 425) (Vertical Down)
+      // Line 5: Pill 3 (540, 425) -> Pill 4 (170, 425) (Horizontal Left)
+      // Line 6: Pill 3 (540, 425) -> Diamond 3 (900, 425) (Horizontal Right)
+      // Line 7: Diamond 3 (900, 425) -> End (900, 560) (Vertical Down)
+      // Line 8: Pill 4 (170, 425) -> End (900, 560) (Elbow: down to y=560, right to x=855)
 
-        const rFrom = fromEl.getBoundingClientRect();
-        const rTo = toEl.getBoundingClientRect();
+      const lines = [
+        { id: 'flow-line-0', d: 'M 215 95 L 450 95' }, // Start -> Pill 1
+        { id: 'flow-line-1', d: 'M 630 95 L 855 95' }, // Pill 1 -> Diamond 1
+        { id: 'flow-line-2', d: 'M 900 135 L 900 205' }, // Diamond 1 -> Pill 2
+        { id: 'flow-line-3', d: 'M 810 260 L 585 260' }, // Pill 2 -> Diamond 2
+        { id: 'flow-line-4', d: 'M 540 300 L 540 370' }, // Diamond 2 -> Pill 3
+        { id: 'flow-line-5', d: 'M 450 425 L 260 425' }, // Pill 3 -> Pill 4
+        { id: 'flow-line-6', d: 'M 630 425 L 855 425' }, // Pill 3 -> Diamond 3
+        { id: 'flow-line-7', d: 'M 900 465 L 900 515' }, // Diamond 3 -> End
+        { id: 'flow-line-8', d: 'M 170 480 L 170 560 L 855 560' } // Pill 4 -> Elbow -> End
+      ];
 
-        const x1 = Math.round(rFrom.right + 3);
-        const y1 = Math.round(rFrom.top + rFrom.height / 2);
-        const x2 = Math.round(rTo.left - 5);
-        const y2 = Math.round(rTo.top + rTo.height / 2);
-
+      lines.forEach(lineDef => {
         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute('id', `flow-line-${i}`);
+        path.setAttribute('id', lineDef.id);
         path.setAttribute('class', 'flow-line');
-        path.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
+        path.setAttribute('d', lineDef.d);
         path.setAttribute('marker-end', 'url(#arrow-dim)');
         svg.appendChild(path);
-      }
+      });
     });
 
     // Initial frame
     const initBuf = await page.screenshot({ type: 'png' });
-    frames.push({ buffer: initBuf, delay: 600 });
+    frames.push({ buffer: initBuf, delay: 500 });
 
-    // Step sequences with coordinates and protocol details
-    const stepSequence = [
-      { targetId: 'terminal-start', message: 'Client initiates request lifecycle', protocol: 'HTTP/3 QUIC · TLS 1.3' },
-      { targetId: 'stage-node-0', message: `Client SPA renders and dispatches payload [${stages[0].label}]`, protocol: 'POST /api/v1/auth' },
-      { targetId: 'stage-node-1', message: `Edge Proxy validates origin & rate limits [${stages[1].label}]`, protocol: 'WAF Rule · 0ms Edge' },
-      { targetId: 'diamond-node', message: 'Security & Token Validation passed: Signature HMAC-SHA256 valid', protocol: 'OAuth2 JWT · Verified' },
-      { targetId: 'stage-node-2', message: `API Gateway routes payload to microservices [${stages[2].label}]`, protocol: 'gRPC / GraphQL Schema' },
-      { targetId: 'stage-node-3', message: `Database Pool & Redis Cache synchronizes state [${stages[4] ? stages[4].label : stages[3].label}]`, protocol: 'ACID TX · 1.4ms Cache' },
-      { targetId: 'terminal-end', message: 'Pipeline complete: Sealed response dispatched to client', protocol: '200 OK · 18ms Roundtrip' }
+    // Step animation sequence matching the snake flow
+    const sequence = [
+      {
+        targetId: 'terminal-start',
+        activeLineId: null,
+        message: 'Client initiates request lifecycle',
+        protocol: 'HTTP/3 QUIC · TLS 1.3',
+        packetPos: { x: 170, y: 95 }
+      },
+      {
+        targetId: 'stage-node-0',
+        activeLineId: 'flow-line-0',
+        message: `Client SPA renders and dispatches payload [${stages[0].label}]`,
+        protocol: 'POST /api/v1/auth',
+        packetPos: { x: 540, y: 95 }
+      },
+      {
+        targetId: 'diamond-node-1',
+        activeLineId: 'flow-line-1',
+        message: 'Edge WAF inspection & Rate Limit verified',
+        protocol: 'WAF Rule 0ms · Passed',
+        packetPos: { x: 900, y: 95 }
+      },
+      {
+        targetId: 'stage-node-1',
+        activeLineId: 'flow-line-2',
+        message: `Edge CDN proxies request to nearest region [${stages[1].label}]`,
+        protocol: 'Edge Cache · Pop SFO',
+        packetPos: { x: 900, y: 260 }
+      },
+      {
+        targetId: 'diamond-node-2',
+        activeLineId: 'flow-line-3',
+        message: 'HMAC-SHA256 Token Signature Authenticated',
+        protocol: 'OAuth2 JWT · Valid',
+        packetPos: { x: 540, y: 260 }
+      },
+      {
+        targetId: 'stage-node-2',
+        activeLineId: 'flow-line-4',
+        message: `API Gateway routes payload to microservices [${stages[2].label}]`,
+        protocol: 'gRPC / GraphQL Schema',
+        packetPos: { x: 540, y: 425 }
+      },
+      {
+        targetId: 'stage-node-3',
+        activeLineId: 'flow-line-5',
+        message: `Auth & Session Vault verifies air-gapped claim [${stages[3].label}]`,
+        protocol: 'Zero-Knowledge Proof',
+        packetPos: { x: 170, y: 425 }
+      },
+      {
+        targetId: 'diamond-node-3',
+        activeLineId: 'flow-line-6',
+        message: `Distributed DB & Redis cache commits state transaction`,
+        protocol: 'ACID TX · 1.4ms Cache',
+        packetPos: { x: 900, y: 425 }
+      },
+      {
+        targetId: 'terminal-end',
+        activeLineId: 'flow-line-7',
+        message: 'Pipeline complete: Sealed 200 OK dispatched to client',
+        protocol: '200 OK · 18ms Roundtrip',
+        packetPos: { x: 900, y: 560 }
+      }
     ];
 
-    for (let s = 0; s < stepSequence.length; s++) {
-      const step = stepSequence[s];
+    for (let s = 0; s < sequence.length; s++) {
+      const step = sequence[s];
 
-      await page.evaluate(({ seqIdx, stepInfo }) => {
+      await page.evaluate(({ stepInfo }) => {
         const target = document.getElementById(stepInfo.targetId);
-        if (target) {
-          target.classList.add('active');
-        }
+        if (target) target.classList.add('active');
 
-        if (seqIdx > 0) {
-          const prevLine = document.getElementById(`flow-line-${seqIdx - 1}`);
-          if (prevLine) {
-            prevLine.classList.add('active');
-            prevLine.setAttribute('marker-end', 'url(#arrow)');
+        if (stepInfo.activeLineId) {
+          const line = document.getElementById(stepInfo.activeLineId);
+          if (line) {
+            line.classList.add('active');
+            line.setAttribute('marker-end', 'url(#arrow)');
           }
         }
 
@@ -586,39 +661,40 @@ async function generateFlowchartGif(options = {}) {
         if (msg) msg.textContent = stepInfo.message;
         if (proto) proto.textContent = stepInfo.protocol;
 
-        // Position animated packet
         const packet = document.getElementById('flow-packet');
-        if (packet && target) {
-          const rect = target.getBoundingClientRect();
+        if (packet && stepInfo.packetPos) {
           packet.style.opacity = '1';
-          packet.style.left = (rect.left + rect.width / 2) + 'px';
-          packet.style.top = (rect.top + rect.height / 2) + 'px';
+          packet.style.left = `${stepInfo.packetPos.x}px`;
+          packet.style.top = `${stepInfo.packetPos.y}px`;
         }
-      }, { seqIdx: s, stepInfo: step });
+      }, { stepInfo: step });
 
-      // Capture progression frames with packet motion along connecting arrow
-      for (let f = 0; f < 4; f++) {
-        if (s > 0) {
-          const lineIdx = s - 1;
-          await page.evaluate(({ lineIdx, frameIdx, totalFrames }) => {
-            const line = document.getElementById(`flow-line-${lineIdx}`);
+      // Animate packet travel along the active line if applicable
+      if (step.activeLineId) {
+        for (let f = 1; f <= 3; f++) {
+          await page.evaluate(({ lineId, frameIdx, totalFrames }) => {
+            const line = document.getElementById(lineId);
             const packet = document.getElementById('flow-packet');
             if (line && packet) {
-              const length = line.getTotalLength();
-              const pt = line.getPointAtLength(length * (frameIdx / totalFrames));
-              packet.style.left = Math.round(pt.x) + 'px';
-              packet.style.top = Math.round(pt.y) + 'px';
-              packet.style.opacity = '1';
+              const len = line.getTotalLength();
+              const pt = line.getPointAtLength(len * (frameIdx / totalFrames));
+              packet.style.left = `${Math.round(pt.x)}px`;
+              packet.style.top = `${Math.round(pt.y)}px`;
             }
-          }, { lineIdx, frameIdx: f + 1, totalFrames: 4 });
+          }, { lineId: step.activeLineId, frameIdx: f, totalFrames: 3 });
+
+          await page.waitForTimeout(140);
+          const buf = await page.screenshot({ type: 'png' });
+          frames.push({ buffer: buf, delay: 240 });
         }
-        await page.waitForTimeout(160);
+      } else {
+        await page.waitForTimeout(200);
         const buf = await page.screenshot({ type: 'png' });
-        frames.push({ buffer: buf, delay: 280 });
+        frames.push({ buffer: buf, delay: 350 });
       }
     }
 
-    // Final hold frames with all circuits and arrows lit
+    // Final hold frames with all circuits glowing
     await page.evaluate(() => {
       document.getElementById('status-message').textContent = '✓ Pipeline Executed: Zero Bottlenecks · Stream Complete';
       document.getElementById('status-protocol').textContent = 'LATENCY: 18ms';
@@ -627,25 +703,30 @@ async function generateFlowchartGif(options = {}) {
         line.setAttribute('marker-end', 'url(#arrow)');
       });
     });
-    for (let f = 0; f < 5; f++) {
+
+    for (let h = 0; h < 4; h++) {
       await page.waitForTimeout(200);
-      const buf = await page.screenshot({ type: 'png' });
-      frames.push({ buffer: buf, delay: 350 });
+      const holdBuf = await page.screenshot({ type: 'png' });
+      frames.push({ buffer: holdBuf, delay: 400 });
     }
 
-    // Close page to finalize Playwright WebM video
+    // Finalize video
     await page.close();
     const video = page.video();
-    const recordedVideoPath = await video.path();
-    fs.copyFileSync(recordedVideoPath, videoPath);
-    console.log(`Saved Flowchart HD Video: ${videoFilename}`);
+    if (video) {
+      const recordedVideoPath = await video.path();
+      fs.copyFileSync(recordedVideoPath, videoPath);
+      console.log(`[Flowchart] Saved HD Video: ${videoFilename}`);
+    }
 
     await context.close();
     await browser.close();
 
-    console.log(`Encoding Flowchart GIF: ${gifFilename} (${frames.length} frames)...`);
+    console.log(`[Flowchart] Collected ${frames.length} frames. Encoding GIF: ${gifFilename}...`);
     const gifRes = await encodeGifFromPngFrames(frames, gifPath, width, height, 'contain');
-    console.log(`Saved Flowchart GIF: ${gifFilename} (${(gifRes.size / 1024 / 1024).toFixed(2)} MB)`);
+    console.log(`[Flowchart] Saved GIF: ${gifFilename} (${(gifRes.size / 1024 / 1024).toFixed(2)} MB)`);
+
+    const videoSize = fs.existsSync(videoPath) ? fs.statSync(videoPath).size : 0;
 
     return {
       success: true,
@@ -653,8 +734,10 @@ async function generateFlowchartGif(options = {}) {
       videoFilename,
       gifPath,
       videoPath,
+      gifUrl: `/outputs/${gifFilename}`,
+      videoUrl: `/outputs/${videoFilename}`,
       size: gifRes.size,
-      videoSize: fs.statSync(videoPath).size,
+      videoSize,
       frameCount: frames.length,
       width,
       height,

@@ -7,19 +7,19 @@ const { generateFlowchartGif } = require('./flowchartAnimator');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const OUTPUT_DIR = path.join(__dirname, 'outputs');
+const OUTPUT_DIR = path.join(__dirname, '..', 'public', 'outputs');
 
 if (!fs.existsSync(OUTPUT_DIR)) {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 }
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use('/outputs', express.static(OUTPUT_DIR));
 
 // Demo route shortcut
 app.get('/demo', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'demo', 'index.html'));
+  res.sendFile(path.join(__dirname, '..', 'public', 'demo', 'index.html'));
 });
 
 // Health check
@@ -43,10 +43,10 @@ app.post('/api/plan', (req, res) => {
   }
 });
 
-// Generate Web Walkthrough GIF
+// Generate Web Walkthrough GIF & Video
 app.post('/api/generate-walkthrough', async (req, res) => {
   try {
-    let { plan, prompt, targetUrl, duration } = req.body;
+    let { plan, prompt, targetUrl, duration, aspectRatio, fitStrategy } = req.body;
     const defaultUrl = `http://localhost:${PORT}/demo`;
 
     if (!plan) {
@@ -56,17 +56,23 @@ app.post('/api/generate-walkthrough', async (req, res) => {
       plan = planInstructions(prompt, targetUrl || defaultUrl, { duration });
     }
 
-    // Ensure absolute targetUrl with port
+    // Ensure absolute targetUrl with port if local path
     if (plan.targetUrl && plan.targetUrl.startsWith('/')) {
       plan.targetUrl = `http://localhost:${PORT}${plan.targetUrl}`;
     }
 
-    console.log(`Starting walkthrough generation for "${plan.title}"...`);
-    const result = await recordWalkthrough(plan, { outputDir: OUTPUT_DIR });
-    
+    console.log(`[Server] Generating walkthrough for "${plan.title}" (${plan.targetUrl}) [${aspectRatio || '1:1'}]...`);
+    const result = await recordWalkthrough(plan, {
+      outputDir: OUTPUT_DIR,
+      aspectRatio,
+      fitStrategy,
+      duration: duration || plan.estimatedDurationSec
+    });
+
     res.json({
       success: true,
       gifUrl: `/outputs/${result.gifFilename}`,
+      videoUrl: result.videoFilename ? `/outputs/${result.videoFilename}` : null,
       ...result
     });
   } catch (err) {
@@ -75,16 +81,23 @@ app.post('/api/generate-walkthrough', async (req, res) => {
   }
 });
 
-// Generate Flowchart Architecture GIF
+// Generate Flowchart Architecture GIF & Video
 app.post('/api/generate-flowchart', async (req, res) => {
   try {
-    const { title, nodes } = req.body;
-    console.log(`Starting flowchart generation for "${title || 'Architecture Flow'}"...`);
-    const result = await generateFlowchartGif({ title, nodes, outputDir: OUTPUT_DIR });
-    
+    const { title, nodes, stages, colorMode } = req.body;
+    const resolvedStages = (stages && stages.length > 0) ? stages : nodes;
+    console.log(`[Server] Generating flowchart for "${title || 'Architecture Flow'}" [${colorMode || 'multicolor'}]...`);
+    const result = await generateFlowchartGif({
+      title,
+      stages: resolvedStages,
+      colorMode: colorMode || 'multicolor',
+      outputDir: OUTPUT_DIR
+    });
+
     res.json({
       success: true,
       gifUrl: `/outputs/${result.gifFilename}`,
+      videoUrl: result.videoFilename ? `/outputs/${result.videoFilename}` : null,
       ...result
     });
   } catch (err) {

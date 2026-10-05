@@ -1437,3 +1437,137 @@ body {
 .hidden {
   display: none !important;
 }
+
+/* ─── SARI Hook Framework Prompt Studio ─────────────────────────────────────── */
+.sari-studio-block {
+  margin: 0.5rem 0 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  background: rgba(15, 23, 42, 0.5);
+  overflow: hidden;
+}
+
+.sari-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sari-title {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  flex: 1;
+}
+
+.sari-framework-badge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--accent-cyan);
+  background: rgba(6, 182, 212, 0.1);
+  border: 1px solid rgba(6, 182, 212, 0.25);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.sari-desc {
+  font-size: 0.76rem;
+  color: var(--text-dim);
+  padding: 8px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.sari-fields {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sari-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.sari-field-label {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sari-letter {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sari-s { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+.sari-a { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+.sari-r { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+.sari-i { background: rgba(6, 182, 212, 0.15); color: #06b6d4; border: 1px solid rgba(6, 182, 212, 0.3); }
+
+.sari-label-text {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.sari-hint {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+.sari-textarea {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: #f1f5f9;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  line-height: 1.45;
+  padding: 8px 10px;
+  resize: vertical;
+  min-height: 48px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.sari-textarea:focus {
+  border-color: var(--accent-cyan);
+}
+
+.sari-assembled {
+  padding: 10px 14px 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.sari-assembled-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 5px;
+}
+
+.sari-assembled textarea {
+  opacity: 0.75;
+  font-size: 0.76rem;
+}

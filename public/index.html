@@ -128,13 +128,65 @@
               </div>
             </div>
 
-            <div class="input-block">
-              <label class="field-label" for="instructions-input">Walkthrough Interaction Script</label>
-              <textarea id="instructions-input" rows="4" class="textarea-code" placeholder="Describe the interactions to record...">1. Inspect Desktop Split-Panel & Sticky Settings Sidebar: Real-time entropy calculation (~105 bits).
-2. Quick One-Tap Generation: Single-click regeneration with cursor glide, click ripple, and real-time strength update.
-3. Passphrase Mode: Toggle dictionary passphrase mode showing memorable hyphenated words.
-4. Vector QR Code SVG Modal: Open air-gapped QR code modal for instant device transfer.
-5. Mobile Responsive Viewport: Switch to mobile viewport highlighting the sticky thumb-reach action bar.</textarea>
+            <!-- SARI Hook Framework for Prompt Studio -->
+            <div class="sari-studio-block">
+              <div class="sari-header">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 20h9"></path>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                </svg>
+                <span class="sari-title">Walkthrough Prompt Studio</span>
+                <span class="sari-framework-badge">SARI Hook Framework</span>
+              </div>
+              <p class="sari-desc">Structure your walkthrough using proven storytelling hooks for maximum LinkedIn engagement.</p>
+
+              <div class="sari-fields">
+                <div class="sari-field">
+                  <div class="sari-field-label">
+                    <span class="sari-letter sari-s">S</span>
+                    <span class="sari-label-text">Situation</span>
+                    <span class="sari-hint">What specific problem or landscape were you dealing with?</span>
+                  </div>
+                  <textarea id="sari-situation" rows="2" class="sari-textarea" placeholder="e.g. Most developer showcases lack visual proof — users see a GitHub link, not a live demo...">Most LinkedIn developer posts show GitHub links or screenshots. There's no visual proof of the actual live UX — no cursor motion, no interactions, no authentic feel.</textarea>
+                </div>
+
+                <div class="sari-field">
+                  <div class="sari-field-label">
+                    <span class="sari-letter sari-a">A</span>
+                    <span class="sari-label-text">Action</span>
+                    <span class="sari-hint">What technical or creative steps did you take to tackle it?</span>
+                  </div>
+                  <textarea id="sari-action" rows="3" class="sari-textarea" placeholder="e.g. Built a headless Playwright recorder with cursor glide animation and GIF encoder...">1. Inspect desktop split-panel with real-time entropy meter (~105 bits).
+2. One-tap password regeneration — cursor glide + click ripple.
+3. Toggle passphrase mode showing correct-horse-battery-staple words.
+4. Open air-gapped QR code SVG modal for instant device transfer.
+5. Switch to mobile viewport highlighting sticky thumb-reach action bar.</textarea>
+                </div>
+
+                <div class="sari-field">
+                  <div class="sari-field-label">
+                    <span class="sari-letter sari-r">R</span>
+                    <span class="sari-label-text">Result</span>
+                    <span class="sari-hint">What was the tangible, measurable outcome or lesson learned?</span>
+                  </div>
+                  <textarea id="sari-result" rows="2" class="sari-textarea" placeholder="e.g. 3× higher post engagement, 15s walkthrough GIF that actually shows the UX...">Crystal-clear 1080p GIF + HD WebM under 17 seconds. Shows every interaction authentically with zero blur — click ripples, modal transitions, mobile sticky bar.</textarea>
+                </div>
+
+                <div class="sari-field">
+                  <div class="sari-field-label">
+                    <span class="sari-letter sari-i">I</span>
+                    <span class="sari-label-text">Insight</span>
+                    <span class="sari-hint">Give away the core solution for free right in the text.</span>
+                  </div>
+                  <textarea id="sari-insight" rows="2" class="sari-textarea" placeholder="e.g. The insight: cursor motion + click ripples make demo GIFs 3× more credible...">Key insight: cryptographic entropy runs entirely client-side (WebCrypto API) — zero server round-trips, zero data leaves the browser. Air-gapped by design.</textarea>
+                </div>
+              </div>
+
+              <!-- Assembled Script Preview -->
+              <div class="sari-assembled">
+                <div class="sari-assembled-label">Assembled Interaction Script (Sent to Recorder)</div>
+                <textarea id="instructions-input" rows="3" class="textarea-code" placeholder="Your SARI script assembles here automatically..."></textarea>
+              </div>
             </div>
 
             <!-- Collapsible Advanced Recording Controls -->

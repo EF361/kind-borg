@@ -41,7 +41,7 @@ Switching the viewport to Mobile to highlight the sticky thumb-reach action bar 
     console.log('\nTesting Flowchart GIF generation...');
     const flowRes = await generateFlowchartGif({
       title: 'Test Verification Architecture Flow',
-      outputDir: path.join(__dirname, 'src', 'outputs')
+      outputDir: path.join(__dirname, 'public', 'outputs')
     });
     if (!fs.existsSync(flowRes.gifPath)) throw new Error('Flowchart GIF file was not created');
     const flowHeader = fs.readFileSync(flowRes.gifPath).slice(0, 6).toString('ascii');
@@ -53,7 +53,7 @@ Switching the viewport to Mobile to highlight the sticky thumb-reach action bar 
     // 4. Test Playwright Web App Walkthrough recording
     console.log('\nTesting Web Walkthrough recording with Playwright...');
     const walkRes = await recordWalkthrough(plan, {
-      outputDir: path.join(__dirname, 'src', 'outputs')
+      outputDir: path.join(__dirname, 'public', 'outputs')
     });
     if (!fs.existsSync(walkRes.gifPath)) throw new Error('Walkthrough GIF file was not created');
     const walkHeader = fs.readFileSync(walkRes.gifPath).slice(0, 6).toString('ascii');
