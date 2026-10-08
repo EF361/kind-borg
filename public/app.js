@@ -256,13 +256,13 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/>/g, '&gt;');
   }
 
-  // 8. SARI-Driven Smart Caption Generator
+  // 8. Natural Builder Journey Caption Generator (Organic SARI Storytelling)
   function generateSmartCaption() {
     const url = targetUrlInput.value.trim() || 'https://my-app.vercel.app';
-    const situation = (sariSituation ? sariSituation.value.trim() : '') || 'Most developer showcases either lack tangible proof or rely on heavy screen recordings that get skipped.';
+    const situation = (sariSituation ? sariSituation.value.trim() : '') || 'Most developer showcases lack tangible proof—people see a static screenshot and have to imagine what the UX feels like.';
     const action = (sariAction ? sariAction.value.trim() : '') || 'Engineered an authentic visual walkthrough with automated cursor tracking and real-time state feedback.';
-    const result = (sariResult ? sariResult.value.trim() : '') || 'Instant, verifiable proof with zero blur and 1080p resolution.';
-    const insight = (sariInsight ? sariInsight.value.trim() : '') || 'The core solution: keep critical computation client-side for zero latency and complete privacy.';
+    const result = (sariResult ? sariResult.value.trim() : '') || 'Crystal-clear 1080p recording under 17 seconds with zero blur and 60fps fluidity.';
+    const insight = (sariInsight ? sariInsight.value.trim() : '') || 'Keeping heavy computations client-side via native Web APIs eliminates server roundtrips and protects user privacy by default.';
     const notes = captionPromptInput.value.trim();
 
     const activeTags = Array.from(document.querySelectorAll('.tag-pill.active'))
@@ -272,65 +272,76 @@ document.addEventListener('DOMContentLoaded', () => {
     let postText = '';
 
     if (activeTonePreset === 'launch') {
-      postText = `🚀 Excited to publicly release our latest build: ${url}!
+      postText = `I spent the week building something I genuinely needed: ${url}
 
-• Situation: ${situation}
-• Action: ${action.split('\n')[0] || action}
-• Result: ${result}
-• Core Insight: ${insight}
+${situation}
 
-✨ Key Highlights:
-• ${notes || 'Instant responsive execution with zero latency'}
-• Native 1080p rendering optimized for LinkedIn feeds
-• Complete client-side security with zero server lag
+Whenever I shared progress, static screenshots never told the full story. So here is the actual walkthrough in action:
 
-👉 Check it out live here: ${url}
-I'd love your feedback—what should we add next?
+${notes ? '✨ What is happening in this clip:\n' + notes.split('\n').map(n => '• ' + n.trim().replace(/^[0-9]+\.\s*/, '')).filter(Boolean).join('\n') + '\n\n' : ''}The real outcome: ${result}
+
+💡 The biggest engineering takeaway:
+${insight}
+
+Live build is up here if you want to test it: ${url}
+What is one UI or architecture detail you find yourself obsessively polishing?
 
 ${activeTags}`;
     } else if (activeTonePreset === 'architecture') {
-      postText = `🏗️ System Architecture Deep Dive: Building scalable, low-latency web apps at ${url}
+      postText = `Behind every smooth 60fps UI is an intentional, low-latency pipeline.
 
-Behind every smooth 60fps UI is an intentional pipeline:
+Here is the exact request lifecycle & architecture powering ${url}:
 
-1️⃣ Client Tier: Modern React/Next.js SPA with client-side state
-2️⃣ Edge Layer: Global CDN & WAF rate limiting
-3️⃣ API Gateway: Microservices schema synchronization
-4️⃣ Security Vault: Air-gapped cryptographic tokens
+[Start Client] ➔ [Edge CDN & WAF] ➔ [API Gateway] ➔ [Storage & Vault] ➔ [200 OK]
 
-💡 Engineering Takeaway (SARI Framework):
-• Situation: ${situation}
-• Action: ${action.split('\n')[0] || action}
-• Result: ${result}
-• Insight: ${insight}
+${situation}
 
-Engineers: how do you balance edge computation vs client-side processing?
+Why we engineered it this way:
+${action ? action.split('\n').filter(Boolean).map(a => '• ' + a.trim().replace(/^[0-9]+\.\s*/, '')).slice(0, 4).join('\n') : '• Edge Routing: WAF inspection & rate limiting before hitting backend logic\n• Decoupled Vault: Air-gapped verification\n• Fast Cache: Sub-2ms distributed state synchronization'}
+
+The result: ${result}
+
+💡 Key Architectural Insight:
+${insight}
+
+Engineers: how do you balance edge computation vs centralized database transactions in your current stack?
+
+Explore the live build: ${url}
 
 ${activeTags}`;
     } else if (activeTonePreset === 'buildinpublic') {
-      postText = `📈 Building in Public: Shipping ${url}
+      postText = `Another milestone shipped in public: ${url}
 
-• Situation: ${situation}
-• Action Taken: ${action.split('\n')[0] || action}
-• Measurable Result: ${result}
-• Technical Insight: ${insight}
+Building this came directly from a real friction:
+${situation}
 
-Shipping consistently in public forces extreme clarity on product priorities.
+Here is what went into this iteration:
+${action ? action.split('\n').filter(Boolean).map(a => '• ' + a.trim().replace(/^[0-9]+\.\s*/, '')).slice(0, 3).join('\n') : '• Clean client-side state engine\n• Sticky mobile thumb-reach ergonomics\n• Air-gapped offline transfer'}
 
-Try the live version: ${url}
+The numbers so far: ${result}
+
+🔑 Lesson learned the hard way:
+${insight}
+
+Shipping in public forces extreme clarity on product priorities. Try the build and break it: ${url}
 
 ${activeTags}`;
     } else if (activeTonePreset === 'feature') {
-      postText = `💡 UX Spotlight: Crafting delightful interactions at ${url}
+      postText = `Most users won’t consciously notice this detail in ${url}. But they will feel it.
 
-Great software is defined by the details users feel rather than notice.
+${situation}
 
-• Problem solved: ${situation}
-• How we tackled it: ${action.split('\n')[0] || action}
-• The outcome: ${result}
-• Core Insight: ${insight}
+So we re-engineered the entire interaction flow:
+${action ? action.split('\n').filter(Boolean).map(a => '• ' + a.trim().replace(/^[0-9]+\.\s*/, '')).slice(0, 3).join('\n') : '• Zero-latency client execution\n• Real-time responsive visual feedback\n• Clean ergonomics'}
 
-Try it out directly: ${url}
+The difference: ${result}
+
+🎯 The Core Insight:
+${insight}
+
+Good software isn't just about clean code—it's about respecting the physical ergonomics of how people actually use the tool.
+
+Try it out live: ${url}
 
 ${activeTags}`;
     }
@@ -341,22 +352,23 @@ ${activeTags}`;
 
   // 9. Prompt Templates & Prompt Manager Modal Logic
   const DEFAULT_TEMPLATES = {
-    launch: `Most developer demos on LinkedIn have a credibility problem:
+    launch: `I spent the week building something I genuinely needed: {url}
 
-They share a GitHub repo link or a static screenshot and expect people to imagine what the UX feels like.
-No cursor path. No interaction latency. No proof of what actually happens when you click.
+{situation}
 
-Here is the authentic walkthrough of {url} in action:
+Whenever I shared progress, static screenshots never told the full story. So here is the actual walkthrough in action:
 
-• Situation: {situation}
-• Action: {action}
-• Result: {result}
-• Core Insight: {insight}
+✨ Highlights:
+{notes}
 
-✨ Key Highlights:
-• {notes}
+The real outcome: {result}
 
-Try the live build yourself: {url}
+💡 The biggest engineering takeaway:
+{insight}
+
+Live build is up here if you want to test it: {url}
+What is one UI or architecture detail you find yourself obsessively polishing?
+
 #BuildInPublic #WebDevelopment #FrontendEngineering #NextJS #UIUX #SoftwareEngineering`,
 
     architecture: `Behind every smooth 60fps user experience is an intentional, low-latency pipeline.
@@ -365,44 +377,57 @@ Here is the exact request lifecycle & architecture powering {url}:
 
 [Start Client] ➔ [Edge CDN & WAF] ➔ [API Gateway] ➔ [Distributed Storage & Vault] ➔ [200 OK]
 
-1️⃣ Client Tier: SPA / Mobile with client-side state
-2️⃣ Edge Layer: Global CDN & WAF rate limiting
-3️⃣ API Gateway: Microservices schema synchronization
-4️⃣ Security Vault: Air-gapped cryptographic tokens
-5️⃣ Storage Layer: PostgreSQL persistence + Redis cache
+{situation}
 
-💡 Architectural Breakdown (SARI):
-• Situation: {situation}
-• Action: {action}
-• Result: {result}
-• The Insight: {insight}
+Why we engineered it this way:
+• Edge Routing First: WAF inspection & rate limiting before hitting backend logic
+• Token Verification at Edge: Eliminates redundant database hits
+• Decoupled Vault: Air-gapped verification & Zero-Knowledge tokens
+
+The result: {result}
+
+💡 Architectural Takeaway:
+{insight}
 
 Engineers: How are you balancing edge computation vs centralized database transactions?
 Explore the live app: {url}
-#SoftwareArchitecture #SystemDesign #EdgeComputing #FullStack #BackendEngineering`,
 
-    buildinpublic: `📈 Building in Public: Shipping {url}
+#SoftwareArchitecture #SystemDesign #EdgeComputing #FullStack #BackendEngineering #DevOps`,
 
-• Situation: {situation}
-• Action Taken: {action}
-• Measurable Result: {result}
-• Technical Insight: {insight}
+    buildinpublic: `Another milestone shipped in public: {url}
 
-Shipping consistently in public forces extreme clarity on product priorities.
+Building this came directly from real friction:
+{situation}
 
-Try the live version: {url}
+Here is what went into this iteration:
+{action}
+
+The numbers so far: {result}
+
+🔑 Lesson learned the hard way:
+{insight}
+
+Shipping in public forces extreme clarity on product priorities.
+Try the build and break it: {url}
+
 #IndieHacker #BuildInPublic #StartupLife #FullStack #WebDevelopment`,
 
-    feature: `💡 UX Spotlight: Crafting delightful interactions at {url}
+    feature: `Most users won’t consciously notice this detail in {url}. But they will feel it.
 
-Great software is defined by the details users feel rather than notice.
+{situation}
 
-• Problem solved: {situation}
-• How we tackled it: {action}
-• The outcome: {result}
-• Core Insight: {insight}
+So we re-thought the viewport ergonomics:
+• Persistent thumb-reach trigger bar
+• Micro-interaction ripples with zero frame drops
+• Air-gapped vector modal transitions
 
-Try it out directly: {url}
+The difference: {result}
+
+🎯 The Core Insight:
+{insight}
+
+Try clicking through it live: {url}
+
 #ProductDesign #UIUX #FrontendDev #JavaScript #UserExperience`
   };
 
