@@ -339,9 +339,97 @@ ${activeTags}`;
     syncCaptionToPreview();
   }
 
-  // 9. Prompt Manager Modal Logic
+  // 9. Prompt Templates & Prompt Manager Modal Logic
+  const DEFAULT_TEMPLATES = {
+    launch: `Most developer demos on LinkedIn have a credibility problem:
+
+They share a GitHub repo link or a static screenshot and expect people to imagine what the UX feels like.
+No cursor path. No interaction latency. No proof of what actually happens when you click.
+
+Here is the authentic walkthrough of {url} in action:
+
+• Situation: {situation}
+• Action: {action}
+• Result: {result}
+• Core Insight: {insight}
+
+✨ Key Highlights:
+• {notes}
+
+Try the live build yourself: {url}
+#BuildInPublic #WebDevelopment #FrontendEngineering #NextJS #UIUX #SoftwareEngineering`,
+
+    architecture: `Behind every smooth 60fps user experience is an intentional, low-latency pipeline.
+
+Here is the exact request lifecycle & architecture powering {url}:
+
+[Start Client] ➔ [Edge CDN & WAF] ➔ [API Gateway] ➔ [Distributed Storage & Vault] ➔ [200 OK]
+
+1️⃣ Client Tier: SPA / Mobile with client-side state
+2️⃣ Edge Layer: Global CDN & WAF rate limiting
+3️⃣ API Gateway: Microservices schema synchronization
+4️⃣ Security Vault: Air-gapped cryptographic tokens
+5️⃣ Storage Layer: PostgreSQL persistence + Redis cache
+
+💡 Architectural Breakdown (SARI):
+• Situation: {situation}
+• Action: {action}
+• Result: {result}
+• The Insight: {insight}
+
+Engineers: How are you balancing edge computation vs centralized database transactions?
+Explore the live app: {url}
+#SoftwareArchitecture #SystemDesign #EdgeComputing #FullStack #BackendEngineering`,
+
+    buildinpublic: `📈 Building in Public: Shipping {url}
+
+• Situation: {situation}
+• Action Taken: {action}
+• Measurable Result: {result}
+• Technical Insight: {insight}
+
+Shipping consistently in public forces extreme clarity on product priorities.
+
+Try the live version: {url}
+#IndieHacker #BuildInPublic #StartupLife #FullStack #WebDevelopment`,
+
+    feature: `💡 UX Spotlight: Crafting delightful interactions at {url}
+
+Great software is defined by the details users feel rather than notice.
+
+• Problem solved: {situation}
+• How we tackled it: {action}
+• The outcome: {result}
+• Core Insight: {insight}
+
+Try it out directly: {url}
+#ProductDesign #UIUX #FrontendDev #JavaScript #UserExperience`
+  };
+
+  let customTemplates = { ...DEFAULT_TEMPLATES };
+  try {
+    const saved = localStorage.getItem('vp_custom_templates');
+    if (saved) customTemplates = { ...DEFAULT_TEMPLATES, ...JSON.parse(saved) };
+  } catch (_) {}
+
+  function loadTemplateToEditor(key) {
+    if (promptTemplateEditor) {
+      promptTemplateEditor.value = customTemplates[key] || DEFAULT_TEMPLATES[key] || '';
+    }
+  }
+
+  tmplPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      tmplPills.forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      activeTemplateKey = pill.dataset.tmpl || 'launch';
+      loadTemplateToEditor(activeTemplateKey);
+    });
+  });
+
   openPromptManagerBtn.addEventListener('click', () => {
     promptManagerModal.classList.remove('hidden');
+    loadTemplateToEditor(activeTemplateKey);
   });
 
   closePromptModalBtn.addEventListener('click', () => {
@@ -355,10 +443,27 @@ ${activeTags}`;
   });
 
   savePromptsBtn.addEventListener('click', () => {
+    if (promptTemplateEditor) {
+      customTemplates[activeTemplateKey] = promptTemplateEditor.value;
+      try {
+        localStorage.setItem('vp_custom_templates', JSON.stringify(customTemplates));
+      } catch (_) {}
+    }
     promptManagerModal.classList.add('hidden');
-    showToast('Prompt settings saved!');
+    showToast('Prompt template saved & applied!');
     generateSmartCaption();
   });
+
+  if (resetPromptsBtn) {
+    resetPromptsBtn.addEventListener('click', () => {
+      customTemplates = { ...DEFAULT_TEMPLATES };
+      try {
+        localStorage.removeItem('vp_custom_templates');
+      } catch (_) {}
+      loadTemplateToEditor(activeTemplateKey);
+      showToast('Templates reset to SARI defaults.');
+    });
+  }
 
   // 10. Copy Caption Handler
   copyCaptionBtn.addEventListener('click', async () => {
