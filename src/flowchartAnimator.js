@@ -6,12 +6,12 @@ const { resolveTechIcon } = require('./techIcons');
 
 /**
  * Renders and animates a clean, minimalistic 2D architecture flowchart.
- * Directly based on the reference design:
+ * Smooth 60fps-interpolated energy packet flow along curved Bezier conduits.
+ * Directly based on the reference layout:
  * Start circle -> Pill 1 -> Diamond 1 -> Pill 2 -> Diamond 2 -> Pill 3 -> Pill 4/Diamond 3 -> End circle
- * Supports 'multicolor' (tech brand accents) and 'onecolor' (minimalist electric blue).
  */
 async function generateFlowchartGif(options = {}) {
-  const outputDir = options.outputDir || path.join(__dirname, 'outputs');
+  const outputDir = options.outputDir || path.join(__dirname, '..', 'public', 'outputs');
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
   }
@@ -48,7 +48,6 @@ async function generateFlowchartGif(options = {}) {
     };
   });
 
-  // Canvas size: clean 1080 x 740 for spacious 2D layout
   const width = 1080;
   const height = 740;
 
@@ -82,7 +81,7 @@ async function generateFlowchartGif(options = {}) {
           body {
             width: ${width}px;
             height: ${height}px;
-            background: #090d16;
+            background: #080c15;
             color: #f1f5f9;
             font-family: 'Plus Jakarta Sans', sans-serif;
             display: flex;
@@ -92,15 +91,15 @@ async function generateFlowchartGif(options = {}) {
             user-select: none;
           }
 
-          /* Ambient decorative background grid */
+          /* Ambient dark grid */
           body::before {
             content: '';
             position: absolute;
             inset: 0;
             background-image: 
-              radial-gradient(circle at 50% 25%, rgba(59, 130, 246, 0.07) 0%, transparent 65%),
-              linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+              radial-gradient(circle at 50% 30%, rgba(59, 130, 246, 0.08) 0%, transparent 70%),
+              linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
             background-size: 100% 100%, 36px 36px, 36px 36px;
             pointer-events: none;
           }
@@ -148,7 +147,7 @@ async function generateFlowchartGif(options = {}) {
             letter-spacing: 0.04em;
           }
 
-          /* 2D Canvas Flow */
+          /* Canvas */
           .canvas-flow {
             flex: 1;
             position: relative;
@@ -164,35 +163,45 @@ async function generateFlowchartGif(options = {}) {
             pointer-events: none;
             z-index: 5;
           }
-          @keyframes flowDash {
-            to { stroke-dashoffset: -24; }
-          }
           .flow-line {
-            stroke: #2e3e55;
-            stroke-width: 2.5;
+            stroke: #1e293b;
+            stroke-width: 2.4;
             fill: none;
-            stroke-dasharray: 6 4;
-            transition: stroke 0.3s ease;
+            transition: stroke 0.3s ease, filter 0.3s ease;
           }
           .flow-line.active {
             stroke: ${defaultAccent};
-            stroke-dasharray: 8 4;
-            animation: flowDash 0.8s linear infinite;
-            filter: drop-shadow(0 0 6px ${defaultAccent}aa);
+            stroke-width: 2.8;
+            filter: drop-shadow(0 0 6px ${defaultAccent});
           }
 
-          /* Flow Packet Pulse */
+          /* Smooth Energy Packet */
           .flow-packet {
             position: absolute;
-            width: 12px;
-            height: 12px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
-            background: ${defaultAccent};
-            box-shadow: 0 0 16px ${defaultAccent}, 0 0 8px #ffffff;
-            z-index: 25;
+            background: #ffffff;
+            box-shadow: 0 0 10px #ffffff, 0 0 20px ${defaultAccent}, 0 0 35px ${defaultAccent};
+            z-index: 30;
             opacity: 0;
             transform: translate(-50%, -50%);
-            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+          }
+
+          /* Second parallel packet for branching */
+          .flow-packet-sub {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 0 10px #ffffff, 0 0 20px ${defaultAccent}, 0 0 35px ${defaultAccent};
+            z-index: 30;
+            opacity: 0;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
           }
 
           /* Circular Terminals: Start & End */
@@ -200,8 +209,8 @@ async function generateFlowchartGif(options = {}) {
             width: 78px;
             height: 78px;
             border-radius: 50%;
-            background: #111827;
-            border: 2.2px solid #3b82f6;
+            background: #101726;
+            border: 2px solid #2e3e55;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -209,25 +218,22 @@ async function generateFlowchartGif(options = {}) {
             box-shadow: 0 8px 24px rgba(0,0,0,0.5);
             position: absolute;
             z-index: 15;
-            transition: all 0.35s ease;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             transform: translate(-50%, -50%);
-          }
-          .node-terminal.start {
-            border-color: #3b82f6;
-            background: #0f172a;
           }
           .node-terminal.start.active {
             border-color: #60a5fa;
-            box-shadow: 0 0 28px rgba(59, 130, 246, 0.6);
-            transform: translate(-50%, -50%) scale(1.08);
+            background: #0f1d38;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.55);
+            transform: translate(-50%, -50%) scale(1.06);
           }
           .node-terminal.end {
-            border-color: #10b981;
-            background: #0b1f1c;
+            border-color: #1e3a35;
           }
           .node-terminal.end.active {
             border-color: #34d399;
-            box-shadow: 0 0 28px rgba(16, 185, 129, 0.6);
+            background: #092620;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.6);
             transform: translate(-50%, -50%) scale(1.08);
           }
           .terminal-label {
@@ -246,9 +252,9 @@ async function generateFlowchartGif(options = {}) {
 
           /* Rounded Stadium / Pill Nodes */
           .node-pill {
-            width: 170px;
+            width: 172px;
             background: #0f172a;
-            border: 2px solid #24344d;
+            border: 1.8px solid #223249;
             border-radius: 26px;
             padding: 12px 14px 10px 14px;
             display: flex;
@@ -258,13 +264,13 @@ async function generateFlowchartGif(options = {}) {
             z-index: 15;
             box-shadow: 0 8px 24px rgba(0,0,0,0.45);
             transform: translate(-50%, -50%);
-            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
           }
           .node-pill.active {
             border-color: var(--accent);
-            transform: translate(-50%, -50%) scale(1.06);
-            box-shadow: 0 14px 32px rgba(0,0,0,0.65), 0 0 22px var(--glow);
-            background: #141e33;
+            transform: translate(-50%, -50%) scale(1.05);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.65), 0 0 22px var(--glow);
+            background: #131d33;
           }
 
           .tech-icon-frame {
@@ -307,7 +313,7 @@ async function generateFlowchartGif(options = {}) {
             margin-bottom: 7px;
           }
 
-          /* Inner stadium bar (matches reference design!) */
+          /* Inner stadium bar */
           .inner-pill-bar {
             width: 60px;
             height: 6px;
@@ -317,7 +323,7 @@ async function generateFlowchartGif(options = {}) {
           }
           .node-pill.active .inner-pill-bar {
             background: var(--accent);
-            box-shadow: 0 0 8px var(--accent);
+            box-shadow: 0 0 10px var(--accent);
           }
 
           /* Decision Diamond Nodes */
@@ -335,20 +341,20 @@ async function generateFlowchartGif(options = {}) {
             width: 66px;
             height: 66px;
             background: #0f172a;
-            border: 2px solid #24344d;
+            border: 1.8px solid #223249;
             transform: rotate(45deg);
             border-radius: 9px;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-            transition: all 0.35s ease;
+            transition: all 0.3s ease;
           }
           .node-diamond-wrapper.active .diamond-card {
             border-color: ${defaultAccent};
             box-shadow: 0 0 24px ${defaultAccent}66;
             transform: rotate(45deg) scale(1.08);
-            background: #141e33;
+            background: #131d33;
           }
           .diamond-content {
             transform: rotate(-45deg);
@@ -502,20 +508,21 @@ async function generateFlowchartGif(options = {}) {
             <div class="terminal-sub">200 OK</div>
           </div>
 
-          <!-- SVG Arrows connecting items -->
+          <!-- SVG Arrows connecting items with smooth rounded Bezier elbow for line 8 -->
           <svg class="connector-svg" id="connector-svg">
             <defs>
               <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
                 <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="${defaultAccent}"/>
               </marker>
               <marker id="arrow-dim" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#2e3e55"/>
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1e293b"/>
               </marker>
             </defs>
           </svg>
 
-          <!-- Animated Packet -->
+          <!-- Smooth Energy Packet -->
           <div class="flow-packet" id="flow-packet"></div>
+          <div class="flow-packet-sub" id="flow-packet-sub"></div>
         </div>
 
         <div class="status-bar">
@@ -530,34 +537,23 @@ async function generateFlowchartGif(options = {}) {
     `;
 
     await page.setContent(htmlContent);
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(200);
 
-    // Draw SVG connector lines based on 2D snake geometry from reference image
+    // Inject SVG lines with smooth Bezier curve on the bottom elbow
     await page.evaluate(() => {
       const svg = document.getElementById('connector-svg');
       if (!svg) return;
 
-      // Lines definition based on reference layout:
-      // Line 0: Start (170, 95) -> Pill 1 (540, 95) (Horizontal Right)
-      // Line 1: Pill 1 (540, 95) -> Diamond 1 (900, 95) (Horizontal Right)
-      // Line 2: Diamond 1 (900, 95) -> Pill 2 (900, 260) (Vertical Down)
-      // Line 3: Pill 2 (900, 260) -> Diamond 2 (540, 260) (Horizontal Left)
-      // Line 4: Diamond 2 (540, 260) -> Pill 3 (540, 425) (Vertical Down)
-      // Line 5: Pill 3 (540, 425) -> Pill 4 (170, 425) (Horizontal Left)
-      // Line 6: Pill 3 (540, 425) -> Diamond 3 (900, 425) (Horizontal Right)
-      // Line 7: Diamond 3 (900, 425) -> End (900, 560) (Vertical Down)
-      // Line 8: Pill 4 (170, 425) -> End (900, 560) (Elbow: down to y=560, right to x=855)
-
       const lines = [
         { id: 'flow-line-0', d: 'M 215 95 L 450 95' }, // Start -> Pill 1
-        { id: 'flow-line-1', d: 'M 630 95 L 855 95' }, // Pill 1 -> Diamond 1
-        { id: 'flow-line-2', d: 'M 900 135 L 900 205' }, // Diamond 1 -> Pill 2
-        { id: 'flow-line-3', d: 'M 810 260 L 585 260' }, // Pill 2 -> Diamond 2
-        { id: 'flow-line-4', d: 'M 540 300 L 540 370' }, // Diamond 2 -> Pill 3
+        { id: 'flow-line-1', d: 'M 630 95 L 850 95' }, // Pill 1 -> Diamond 1
+        { id: 'flow-line-2', d: 'M 900 145 L 900 220' }, // Diamond 1 -> Pill 2
+        { id: 'flow-line-3', d: 'M 810 260 L 590 260' }, // Pill 2 -> Diamond 2
+        { id: 'flow-line-4', d: 'M 540 310 L 540 385' }, // Diamond 2 -> Pill 3
         { id: 'flow-line-5', d: 'M 450 425 L 260 425' }, // Pill 3 -> Pill 4
-        { id: 'flow-line-6', d: 'M 630 425 L 855 425' }, // Pill 3 -> Diamond 3
-        { id: 'flow-line-7', d: 'M 900 465 L 900 515' }, // Diamond 3 -> End
-        { id: 'flow-line-8', d: 'M 170 480 L 170 560 L 855 560' } // Pill 4 -> Elbow -> End
+        { id: 'flow-line-6', d: 'M 630 425 L 850 425' }, // Pill 3 -> Diamond 3
+        { id: 'flow-line-7', d: 'M 900 475 L 900 518' }, // Diamond 3 -> End
+        { id: 'flow-line-8', d: 'M 170 465 L 170 535 Q 170 560 195 560 L 855 560' } // Pill 4 -> smooth curve -> End
       ];
 
       lines.forEach(lineDef => {
@@ -570,131 +566,136 @@ async function generateFlowchartGif(options = {}) {
       });
     });
 
-    // Initial frame
-    const initBuf = await page.screenshot({ type: 'png' });
-    frames.push({ buffer: initBuf, delay: 500 });
+    // Helper: capture frame
+    async function capture(delay = 75) {
+      const buf = await page.screenshot({ type: 'png' });
+      frames.push({ buffer: buf, delay });
+    }
 
-    // Step animation sequence matching the snake flow
-    const sequence = [
+    // Initial frame
+    await capture(300);
+
+    // Cubic ease-in-out helper
+    function easeInOut(t) {
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    // Sequence of transitions
+    const segments = [
       {
-        targetId: 'terminal-start',
-        activeLineId: null,
-        message: 'Client initiates request lifecycle',
-        protocol: 'HTTP/3 QUIC · TLS 1.3',
-        packetPos: { x: 170, y: 95 }
-      },
-      {
+        lineId: 'flow-line-0',
         targetId: 'stage-node-0',
-        activeLineId: 'flow-line-0',
         message: `Client SPA renders and dispatches payload [${stages[0].label}]`,
         protocol: 'POST /api/v1/auth',
-        packetPos: { x: 540, y: 95 }
+        steps: 8
       },
       {
+        lineId: 'flow-line-1',
         targetId: 'diamond-node-1',
-        activeLineId: 'flow-line-1',
         message: 'Edge WAF inspection & Rate Limit verified',
         protocol: 'WAF Rule 0ms · Passed',
-        packetPos: { x: 900, y: 95 }
+        steps: 8
       },
       {
+        lineId: 'flow-line-2',
         targetId: 'stage-node-1',
-        activeLineId: 'flow-line-2',
         message: `Edge CDN proxies request to nearest region [${stages[1].label}]`,
         protocol: 'Edge Cache · Pop SFO',
-        packetPos: { x: 900, y: 260 }
+        steps: 7
       },
       {
+        lineId: 'flow-line-3',
         targetId: 'diamond-node-2',
-        activeLineId: 'flow-line-3',
         message: 'HMAC-SHA256 Token Signature Authenticated',
         protocol: 'OAuth2 JWT · Valid',
-        packetPos: { x: 540, y: 260 }
+        steps: 8
       },
       {
+        lineId: 'flow-line-4',
         targetId: 'stage-node-2',
-        activeLineId: 'flow-line-4',
         message: `API Gateway routes payload to microservices [${stages[2].label}]`,
         protocol: 'gRPC / GraphQL Schema',
-        packetPos: { x: 540, y: 425 }
+        steps: 7
       },
       {
+        lineId: 'flow-line-5',
         targetId: 'stage-node-3',
-        activeLineId: 'flow-line-5',
         message: `Auth & Session Vault verifies air-gapped claim [${stages[3].label}]`,
         protocol: 'Zero-Knowledge Proof',
-        packetPos: { x: 170, y: 425 }
+        steps: 7
       },
       {
+        lineId: 'flow-line-6',
         targetId: 'diamond-node-3',
-        activeLineId: 'flow-line-6',
-        message: `Distributed DB & Redis cache commits state transaction`,
+        message: 'Distributed DB & Redis cache commits state transaction',
         protocol: 'ACID TX · 1.4ms Cache',
-        packetPos: { x: 900, y: 425 }
+        steps: 7
       },
       {
+        lineId: 'flow-line-7',
         targetId: 'terminal-end',
-        activeLineId: 'flow-line-7',
         message: 'Pipeline complete: Sealed 200 OK dispatched to client',
         protocol: '200 OK · 18ms Roundtrip',
-        packetPos: { x: 900, y: 560 }
+        steps: 6
+      },
+      {
+        lineId: 'flow-line-8',
+        targetId: 'terminal-end',
+        message: 'Session Token synchronized across edge nodes',
+        protocol: 'Global Sync · 200 OK',
+        steps: 9
       }
     ];
 
-    for (let s = 0; s < sequence.length; s++) {
-      const step = sequence[s];
+    // Animate each segment smoothly
+    for (let sIdx = 0; sIdx < segments.length; sIdx++) {
+      const seg = segments[sIdx];
 
-      await page.evaluate(({ stepInfo }) => {
-        const target = document.getElementById(stepInfo.targetId);
-        if (target) target.classList.add('active');
-
-        if (stepInfo.activeLineId) {
-          const line = document.getElementById(stepInfo.activeLineId);
-          if (line) {
-            line.classList.add('active');
-            line.setAttribute('marker-end', 'url(#arrow)');
-          }
+      // Activate line
+      await page.evaluate(({ lineId }) => {
+        const line = document.getElementById(lineId);
+        if (line) {
+          line.classList.add('active');
+          line.setAttribute('marker-end', 'url(#arrow)');
         }
+      }, { lineId: seg.lineId });
+
+      // Animate packet fluidly along line
+      for (let f = 1; f <= seg.steps; f++) {
+        const rawT = f / seg.steps;
+        const easedT = easeInOut(rawT);
+
+        await page.evaluate(({ lineId, t }) => {
+          const line = document.getElementById(lineId);
+          const packet = document.getElementById('flow-packet');
+          if (line && packet) {
+            const len = line.getTotalLength();
+            const pt = line.getPointAtLength(len * t);
+            packet.style.opacity = '1';
+            packet.style.left = `${Math.round(pt.x)}px`;
+            packet.style.top = `${Math.round(pt.y)}px`;
+          }
+        }, { lineId: seg.lineId, t: easedT });
+
+        await capture(75);
+      }
+
+      // Destination node lights up upon packet arrival!
+      await page.evaluate(({ targetId, message, protocol }) => {
+        const target = document.getElementById(targetId);
+        if (target) target.classList.add('active');
 
         const msg = document.getElementById('status-message');
         const proto = document.getElementById('status-protocol');
-        if (msg) msg.textContent = stepInfo.message;
-        if (proto) proto.textContent = stepInfo.protocol;
+        if (msg) msg.textContent = message;
+        if (proto) proto.textContent = protocol;
+      }, { targetId: seg.targetId, message: seg.message, protocol: seg.protocol });
 
-        const packet = document.getElementById('flow-packet');
-        if (packet && stepInfo.packetPos) {
-          packet.style.opacity = '1';
-          packet.style.left = `${stepInfo.packetPos.x}px`;
-          packet.style.top = `${stepInfo.packetPos.y}px`;
-        }
-      }, { stepInfo: step });
-
-      // Animate packet travel along the active line if applicable
-      if (step.activeLineId) {
-        for (let f = 1; f <= 3; f++) {
-          await page.evaluate(({ lineId, frameIdx, totalFrames }) => {
-            const line = document.getElementById(lineId);
-            const packet = document.getElementById('flow-packet');
-            if (line && packet) {
-              const len = line.getTotalLength();
-              const pt = line.getPointAtLength(len * (frameIdx / totalFrames));
-              packet.style.left = `${Math.round(pt.x)}px`;
-              packet.style.top = `${Math.round(pt.y)}px`;
-            }
-          }, { lineId: step.activeLineId, frameIdx: f, totalFrames: 3 });
-
-          await page.waitForTimeout(140);
-          const buf = await page.screenshot({ type: 'png' });
-          frames.push({ buffer: buf, delay: 240 });
-        }
-      } else {
-        await page.waitForTimeout(200);
-        const buf = await page.screenshot({ type: 'png' });
-        frames.push({ buffer: buf, delay: 350 });
-      }
+      // Linger on node arrival for visual punch
+      await capture(120);
     }
 
-    // Final hold frames with all circuits glowing
+    // Final hold frames: all circuits lit, complete pipeline loop
     await page.evaluate(() => {
       document.getElementById('status-message').textContent = '✓ Pipeline Executed: Zero Bottlenecks · Stream Complete';
       document.getElementById('status-protocol').textContent = 'LATENCY: 18ms';
@@ -702,12 +703,14 @@ async function generateFlowchartGif(options = {}) {
         line.classList.add('active');
         line.setAttribute('marker-end', 'url(#arrow)');
       });
+      const p1 = document.getElementById('flow-packet');
+      const p2 = document.getElementById('flow-packet-sub');
+      if (p1) p1.style.opacity = '0';
+      if (p2) p2.style.opacity = '0';
     });
 
     for (let h = 0; h < 4; h++) {
-      await page.waitForTimeout(200);
-      const holdBuf = await page.screenshot({ type: 'png' });
-      frames.push({ buffer: holdBuf, delay: 400 });
+      await capture(300);
     }
 
     // Finalize video
@@ -716,7 +719,7 @@ async function generateFlowchartGif(options = {}) {
     if (video) {
       const recordedVideoPath = await video.path();
       fs.copyFileSync(recordedVideoPath, videoPath);
-      console.log(`[Flowchart] Saved HD Video: ${videoFilename}`);
+      console.log(`[Flowchart] Saved Smooth HD Video: ${videoFilename}`);
     }
 
     await context.close();
@@ -724,7 +727,7 @@ async function generateFlowchartGif(options = {}) {
 
     console.log(`[Flowchart] Collected ${frames.length} frames. Encoding GIF: ${gifFilename}...`);
     const gifRes = await encodeGifFromPngFrames(frames, gifPath, width, height, 'contain');
-    console.log(`[Flowchart] Saved GIF: ${gifFilename} (${(gifRes.size / 1024 / 1024).toFixed(2)} MB)`);
+    console.log(`[Flowchart] Saved Smooth GIF: ${gifFilename} (${(gifRes.size / 1024 / 1024).toFixed(2)} MB)`);
 
     const videoSize = fs.existsSync(videoPath) ? fs.statSync(videoPath).size : 0;
 
@@ -742,7 +745,7 @@ async function generateFlowchartGif(options = {}) {
       width,
       height,
       colorMode,
-      durationSec: Math.round(frames.reduce((a, b) => a + (b.delay || 100), 0) / 1000)
+      durationSec: Math.round(frames.reduce((a, b) => a + (b.delay || 75), 0) / 1000)
     };
   } catch (err) {
     if (browser) await browser.close();
