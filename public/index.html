@@ -89,98 +89,146 @@
             </div>
           </div>
 
-          <!-- Format Switcher: Web Walkthrough vs Architecture Flowchart -->
-          <div class="media-mode-tabs">
-            <button id="tab-walkthrough" class="media-tab-btn active">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="2" y1="12" x2="22" y2="12"></line>
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-              </svg>
-              <span>Web Walkthrough (GIF / HD Video)</span>
-            </button>
-            <button id="tab-flowchart" class="media-tab-btn">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="3" width="7" height="7"></rect>
-                <rect x="14" y="3" width="7" height="7"></rect>
-                <rect x="14" y="14" width="7" height="7"></rect>
-                <rect x="3" y="14" width="7" height="7"></rect>
-              </svg>
-              <span>Architecture Flowchart (Animated Flows)</span>
-            </button>
-          </div>
-
-          <!-- Sub-mode A: Web App Walkthrough -->
-          <div id="mode-walkthrough-view" class="mode-view">
+          <!-- Project & Dashboard Input Card (Blank by Default) -->
+          <div class="project-input-container">
             <div class="input-block">
-              <label class="field-label" for="target-url-input">Project Production URL</label>
+              <div class="field-label-row">
+                <label class="field-label" for="target-url-input">Project Production URL</label>
+                <div class="preset-pill-row">
+                  <span class="preset-label">Quick Fill:</span>
+                  <button type="button" id="preset-example-1" class="pill-btn">PassGen Vault</button>
+                  <button type="button" id="preset-example-2" class="pill-btn">Local Demo</button>
+                  <button type="button" id="preset-clear" class="pill-btn active">Clear (Blank)</button>
+                </div>
+              </div>
               <div class="input-with-icon">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
                   <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
                 </svg>
-                <input type="text" id="target-url-input" value="https://intelligent-curie-alpha.vercel.app/" placeholder="https://your-production-app.vercel.app">
-              </div>
-              <div class="preset-pill-row">
-                <span class="preset-label">Quick Links:</span>
-                <button type="button" id="preset-example-1" class="pill-btn active">PassGen Vault</button>
-                <button type="button" id="preset-example-2" class="pill-btn">Next.js Showcase</button>
+                <input type="text" id="target-url-input" value="" placeholder="https://your-production-app.vercel.app or http://localhost:3000/demo">
               </div>
             </div>
 
-            <!-- SARI Hook Framework for Prompt Studio -->
-            <div class="sari-studio-block">
-              <div class="sari-header">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 20h9"></path>
-                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            <!-- Simple Explanation of the Dashboard / App -->
+            <div class="input-block" style="margin-top: 0.85rem;">
+              <label class="field-label" for="app-explanation-input">Simple Dashboard / App Explanation</label>
+              <textarea id="app-explanation-input" rows="2" class="sari-textarea" placeholder="Describe your app/dashboard in 1–2 simple sentences (e.g. 'Real-time cryptographic password generator with client-side entropy calculation, instant passphrase mode, and air-gapped QR modal')"></textarea>
+            </div>
+
+            <!-- Story Archetypes from TEMPLATE.md -->
+            <div class="archetype-selector-block">
+              <label class="field-label">Story Archetype (from TEMPLATES.md)</label>
+              <div class="archetype-chips" id="archetype-chips">
+                <button type="button" class="archetype-chip active" data-archetype="shipping">🚀 Late-Night Shipping Log</button>
+                <button type="button" class="archetype-chip" data-archetype="decisions">🏗️ Why We Chose X Over Y</button>
+                <button type="button" class="archetype-chip" data-archetype="craft">💡 Micro-Interaction Craft</button>
+                <button type="button" class="archetype-chip" data-archetype="postmortem">🛠️ Unfiltered Post-Mortem</button>
+                <button type="button" class="archetype-chip" data-archetype="contrarian">⚡ Contrarian Visual Proof</button>
+              </div>
+            </div>
+
+            <!-- Synthesize Button -->
+            <button type="button" id="synthesize-showcase-btn" class="btn-action-primary" style="margin-top: 0.9rem;">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+              </svg>
+              <span>Synthesize Differentiating Scenes & Story from TEMPLATES.md</span>
+            </button>
+          </div>
+
+          <!-- Active Showcase Summary Bar -->
+          <div class="active-scenario-card" id="active-scenario-card">
+            <div class="active-scenario-info">
+              <div class="active-scenario-badge-row">
+                <span class="scenario-tag-badge" id="active-scenario-badge">Custom Project Showcase</span>
+                <span class="scenario-target-badge" id="active-scenario-target-badge">Awaiting URL...</span>
+              </div>
+              <h3 id="active-scenario-title" class="active-scenario-title">Ready for Your Dashboard</h3>
+              <p id="active-scenario-desc" class="active-scenario-desc">Enter your URL and explanation above, then click Synthesize to construct unique scenes and an organic builder story.</p>
+            </div>
+            <div class="active-scenario-actions">
+              <button type="button" id="toggle-customize-btn" class="btn-customize-toggle">
+                <span id="customize-toggle-text">Fine-Tune Story & Scene Steps ▾</span>
+                <span id="customize-chevron" class="chevron-indicator">▾</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Collapsible Customization Container (Forms, SARI, Nodes, Settings) -->
+          <div id="scenario-details-container" class="scenario-details-container collapsed">
+            <!-- Format Switcher: Web Walkthrough vs Architecture Flowchart -->
+            <div class="media-mode-tabs">
+              <button id="tab-walkthrough" class="media-tab-btn active">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="2" y1="12" x2="22" y2="12"></line>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
                 </svg>
-                <span class="sari-title">Walkthrough Prompt Studio</span>
-                <span class="sari-framework-badge">SARI Hook Framework</span>
-              </div>
-              <p class="sari-desc">Structure your walkthrough using proven storytelling hooks for maximum LinkedIn engagement.</p>
+                <span>Web Walkthrough (GIF / HD Video)</span>
+              </button>
+              <button id="tab-flowchart" class="media-tab-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="14" width="7" height="7"></rect>
+                  <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                <span>Architecture Flowchart (Animated Flows)</span>
+              </button>
+            </div>
 
-              <div class="sari-fields">
-                <div class="sari-field">
-                  <div class="sari-field-label">
-                    <span class="sari-letter sari-s">S</span>
-                    <span class="sari-label-text">Situation</span>
-                    <span class="sari-hint">What specific problem or landscape were you dealing with?</span>
-                  </div>
-                  <textarea id="sari-situation" rows="2" class="sari-textarea" placeholder="e.g. Most developer showcases lack visual proof — users see a GitHub link, not a live demo...">Most LinkedIn developer posts show GitHub links or screenshots. There's no visual proof of the actual live UX — no cursor motion, no interactions, no authentic feel.</textarea>
+            <!-- Sub-mode A: Web App Walkthrough -->
+            <div id="mode-walkthrough-view" class="mode-view">
+              <!-- SARI Hook Framework for Prompt Studio (Blank by default) -->
+              <div class="sari-studio-block">
+                <div class="sari-header">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 20h9"></path>
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                  </svg>
+                  <span class="sari-title">Walkthrough Prompt Studio</span>
+                  <span class="sari-framework-badge">SARI Hook Framework</span>
                 </div>
+                <p class="sari-desc">Proven storytelling hooks woven organically into authentic builder captions.</p>
 
-                <div class="sari-field">
-                  <div class="sari-field-label">
-                    <span class="sari-letter sari-a">A</span>
-                    <span class="sari-label-text">Action</span>
-                    <span class="sari-hint">What technical or creative steps did you take to tackle it?</span>
+                <div class="sari-fields">
+                  <div class="sari-field">
+                    <div class="sari-field-label">
+                      <span class="sari-letter sari-s">S</span>
+                      <span class="sari-label-text">Situation</span>
+                      <span class="sari-hint">What friction or landscape were you dealing with?</span>
+                    </div>
+                    <textarea id="sari-situation" rows="2" class="sari-textarea" placeholder="e.g. Most developer showcases lack visual proof — static screenshots don't show real-time UX or latency..."></textarea>
                   </div>
-                  <textarea id="sari-action" rows="3" class="sari-textarea" placeholder="e.g. Built a headless Playwright recorder with cursor glide animation and GIF encoder...">1. Inspect desktop split-panel with real-time entropy meter (~105 bits).
-2. One-tap password regeneration — cursor glide + click ripple.
-3. Toggle passphrase mode showing correct-horse-battery-staple words.
-4. Open air-gapped QR code SVG modal for instant device transfer.
-5. Switch to mobile viewport highlighting sticky thumb-reach action bar.</textarea>
-                </div>
 
-                <div class="sari-field">
-                  <div class="sari-field-label">
-                    <span class="sari-letter sari-r">R</span>
-                    <span class="sari-label-text">Result</span>
-                    <span class="sari-hint">What was the tangible, measurable outcome or lesson learned?</span>
+                  <div class="sari-field">
+                    <div class="sari-field-label">
+                      <span class="sari-letter sari-a">A</span>
+                      <span class="sari-label-text">Action</span>
+                      <span class="sari-hint">What technical or creative steps did you take?</span>
+                    </div>
+                    <textarea id="sari-action" rows="3" class="sari-textarea" placeholder="1. Inspect initial layout&#10;2. Trigger primary interaction with cursor glide&#10;3. Demonstrate differentiating feature"></textarea>
                   </div>
-                  <textarea id="sari-result" rows="2" class="sari-textarea" placeholder="e.g. 3× higher post engagement, 15s walkthrough GIF that actually shows the UX...">Crystal-clear 1080p GIF + HD WebM under 17 seconds. Shows every interaction authentically with zero blur — click ripples, modal transitions, mobile sticky bar.</textarea>
-                </div>
 
-                <div class="sari-field">
-                  <div class="sari-field-label">
-                    <span class="sari-letter sari-i">I</span>
-                    <span class="sari-label-text">Insight</span>
-                    <span class="sari-hint">Give away the core solution for free right in the text.</span>
+                  <div class="sari-field">
+                    <div class="sari-field-label">
+                      <span class="sari-letter sari-r">R</span>
+                      <span class="sari-label-text">Result</span>
+                      <span class="sari-hint">What was the tangible, measurable outcome?</span>
+                    </div>
+                    <textarea id="sari-result" rows="2" class="sari-textarea" placeholder="e.g. 1080p walkthrough under 18s showing zero-blur interactions..."></textarea>
                   </div>
-                  <textarea id="sari-insight" rows="2" class="sari-textarea" placeholder="e.g. The insight: cursor motion + click ripples make demo GIFs 3× more credible...">Key insight: cryptographic entropy runs entirely client-side (WebCrypto API) — zero server round-trips, zero data leaves the browser. Air-gapped by design.</textarea>
+
+                  <div class="sari-field">
+                    <div class="sari-field-label">
+                      <span class="sari-letter sari-i">I</span>
+                      <span class="sari-label-text">Insight</span>
+                      <span class="sari-hint">Give away the core technical secret for free right in the text.</span>
+                    </div>
+                    <textarea id="sari-insight" rows="2" class="sari-textarea" placeholder="e.g. Running compute client-side via native Web APIs eliminates server roundtrips..."></textarea>
+                  </div>
                 </div>
-              </div>
 
               <!-- Assembled Script Preview -->
               <div class="sari-assembled">
@@ -261,7 +309,7 @@
           <div id="mode-flowchart-view" class="mode-view hidden">
             <div class="input-block">
               <label class="field-label" for="flowchart-title-input">System / Pipeline Title</label>
-              <input type="text" id="flowchart-title-input" value="Enterprise Serverless & Edge Pipeline" class="text-input">
+              <input type="text" id="flowchart-title-input" value="" placeholder="e.g. Real-Time Cryptographic Pipeline or Edge Serverless Architecture" class="text-input">
             </div>
 
             <div class="input-block">
@@ -282,28 +330,28 @@
               <label class="field-label">Sequential Stages (Connected with Animated Arrows)</label>
               <div class="node-editor-item">
                 <span class="step-num">1</span>
-                <input type="text" value="Web & Mobile Client (React / Next.js)" class="node-input" data-idx="0">
+                <input type="text" value="" placeholder="Stage 1: Web Client (React / Next.js)" class="node-input" data-idx="0">
                 <span class="badge-tag tag-cyan">React</span>
               </div>
               <div class="node-editor-item">
                 <span class="step-num">2</span>
-                <input type="text" value="Edge CDN & WAF (Vercel / Cloudflare)" class="node-input" data-idx="1">
-                <span class="badge-tag tag-white">Vercel</span>
+                <input type="text" value="" placeholder="Stage 2: Edge CDN & WAF (Vercel / Cloudflare)" class="node-input" data-idx="1">
+                <span class="badge-tag tag-white">Edge</span>
               </div>
               <div class="node-editor-item">
                 <span class="step-num">3</span>
-                <input type="text" value="API Gateway (Node.js Express / GraphQL)" class="node-input" data-idx="2">
-                <span class="badge-tag tag-green">Node.js</span>
+                <input type="text" value="" placeholder="Stage 3: API Gateway (Node.js / Express)" class="node-input" data-idx="2">
+                <span class="badge-tag tag-green">API</span>
               </div>
               <div class="node-editor-item">
                 <span class="step-num">4</span>
-                <input type="text" value="Auth & Session Vault (OAuth2 / WebCrypto)" class="node-input" data-idx="3">
-                <span class="badge-tag tag-red">OAuth2</span>
+                <input type="text" value="" placeholder="Stage 4: Auth & Session Vault (OAuth2 / WebCrypto)" class="node-input" data-idx="3">
+                <span class="badge-tag tag-red">Vault</span>
               </div>
               <div class="node-editor-item">
                 <span class="step-num">5</span>
-                <input type="text" value="Distributed Storage (PostgreSQL & Redis)" class="node-input" data-idx="4">
-                <span class="badge-tag tag-blue">Postgres</span>
+                <input type="text" value="" placeholder="Stage 5: Distributed Storage (PostgreSQL & Redis)" class="node-input" data-idx="4">
+                <span class="badge-tag tag-blue">Storage</span>
               </div>
             </div>
 
@@ -318,6 +366,7 @@
             </button>
           </div>
         </div>
+      </div>
 
         <!-- STEP 2: AI Caption Generator & Prompt Studio Card -->
         <div class="studio-card step-card" id="card-step-caption">

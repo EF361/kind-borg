@@ -90,11 +90,28 @@ document.addEventListener('DOMContentLoaded', () => {
   const studioToast = document.getElementById('studio-toast');
   const toastMessage = document.getElementById('toast-message');
 
+  // Project Showcase & TEMPLATES.md Synthesizer Elements
+  const appExplanationInput = document.getElementById('app-explanation-input');
+  const synthesizeShowcaseBtn = document.getElementById('synthesize-showcase-btn');
+  const archetypeChips = document.querySelectorAll('.archetype-chip');
+  const presetClear = document.getElementById('preset-clear');
+
+  const activeScenarioCard = document.getElementById('active-scenario-card');
+  const activeScenarioBadge = document.getElementById('active-scenario-badge');
+  const activeScenarioTargetBadge = document.getElementById('active-scenario-target-badge');
+  const activeScenarioTitle = document.getElementById('active-scenario-title');
+  const activeScenarioDesc = document.getElementById('active-scenario-desc');
+  const toggleCustomizeBtn = document.getElementById('toggle-customize-btn');
+  const customizeToggleText = document.getElementById('customize-toggle-text');
+  const customizeChevron = document.getElementById('customize-chevron');
+  const scenarioDetailsContainer = document.getElementById('scenario-details-container');
+
   // State
   let currentPlan = null;
   let activeTonePreset = 'launch';
   let activeTemplateKey = 'launch';
   let activeMediaResult = null;
+  let activeArchetype = 'shipping'; // from TEMPLATES.md: shipping, decisions, craft, postmortem, contrarian
 
   // 1. SARI Script Auto-Assembly
   function assembleSariScript() {
@@ -179,20 +196,192 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 6. URL Preset Quick Links
+  // 6. Showcase Synthesizer Engine (from TEMPLATES.md)
+  function synthesizeShowcaseFromTemplate() {
+    const url = targetUrlInput.value.trim() || 'https://your-production-app.vercel.app';
+    const explanation = (appExplanationInput ? appExplanationInput.value.trim() : '');
+
+    if (!explanation && !targetUrlInput.value.trim()) {
+      showToast('Please enter your URL or simple app explanation above!');
+      return;
+    }
+
+    const lower = (explanation + ' ' + url).toLowerCase();
+
+    // Deduce differentiating features & technical angles
+    let situation = '';
+    let actionSteps = [];
+    let result = '';
+    let insight = '';
+    let flowTitle = '';
+    let flowStages = [];
+
+    if (lower.includes('pass') || lower.includes('crypto') || lower.includes('vault') || lower.includes('entropy')) {
+      situation = 'Most security and utility tools send sensitive data over HTTP APIs or rely on static screenshots where users cannot verify cryptographic safety or live UX.';
+      actionSteps = [
+        '1. Inspect desktop split-panel with real-time entropy calculation (~105 bits).',
+        '2. Execute one-tap generation with smooth cursor glide & ripple feedback.',
+        '3. Toggle passphrase mode showing dictionary word separation.',
+        '4. Open air-gapped QR code SVG modal for offline mobile transfer.',
+        '5. Highlight responsive mobile viewport with sticky thumb-reach bar.'
+      ];
+      result = 'Crystal-clear 1080p native walkthrough under 18 seconds showing authentic interactions with zero blur.';
+      insight = 'Cryptographic entropy calculated 100% in-browser via WebCrypto API — zero server roundtrips, zero data leaks, air-gapped security.';
+      flowTitle = 'Air-Gapped Client-Side Cryptographic Pipeline';
+      flowStages = [
+        'Web Client UI (React / Next.js)',
+        'Local WebCrypto Engine (Native API)',
+        'Entropy Estimator (~105 bits)',
+        'Air-Gapped QR Encoder (SVG Vector)',
+        'Local Memory Vault (Zero Storage)'
+      ];
+    } else if (lower.includes('ai') || lower.includes('rag') || lower.includes('llm') || lower.includes('vector')) {
+      situation = 'Standard LLM interfaces hallucinate on domain knowledge and freeze the UI during heavy model inference.';
+      actionSteps = [
+        '1. Enter domain prompt in clean distraction-free workspace.',
+        '2. Trigger sub-10ms top-K vector similarity search across indexed knowledge.',
+        '3. Inspect dynamic context chunk injection into model prompt.',
+        '4. Stream synthesized answers with verified inline source citations.'
+      ];
+      result = 'Reduced hallucinations to near zero while achieving sub-800ms time-to-first-token streaming.';
+      insight = 'Chunking domain documents into semantic 300-token windows with 50-token overlaps yields 40% higher precision than raw text chunks.';
+      flowTitle = 'Real-Time AI & RAG Inference Pipeline';
+      flowStages = [
+        'User Query & UI Client (Next.js)',
+        'Semantic Embedding Service (FastAPI)',
+        'Vector DB Search (Pinecone / Milvus)',
+        'LLM Reasoning Engine (Gemini Pro)',
+        'Streaming Response (Server-Sent Events)'
+      ];
+    } else if (lower.includes('queue') || lower.includes('worker') || lower.includes('kafka') || lower.includes('event')) {
+      situation = 'Synchronous HTTP processing fails under sudden burst traffic, causing gateway timeouts and lost customer transactions.';
+      actionSteps = [
+        '1. Ingest webhook event payload with immediate 202 Accepted status.',
+        '2. Push background task onto partition-backed message broker queue.',
+        '3. Dynamically scale worker pool based on consumer topic lag.',
+        '4. Broadcast completion state back to connected clients via WebSockets.'
+      ];
+      result = 'Zero dropped requests during 10× traffic spikes with average job execution latency under 120ms.';
+      insight = 'Decoupling ingestion from execution through durable event queues protects primary databases from connection exhaustion.';
+      flowTitle = 'High-Throughput Event Queue & Worker Pipeline';
+      flowStages = [
+        'Webhook Ingestion API (Fastify)',
+        'Message Broker (Kafka / RabbitMQ)',
+        'Async Worker Pool (Go / Node.js)',
+        'Ephemeral Store (Redis Key-Value)',
+        'Live Client Notification (WebSockets)'
+      ];
+    } else if (lower.includes('mobile') || lower.includes('offline') || lower.includes('sync') || lower.includes('flutter')) {
+      situation = 'Mobile users on unstable network connections suffer from frozen spinners and lost form drafts.';
+      actionSteps = [
+        '1. Commit user interactions immediately to local encrypted SQLite storage.',
+        '2. Queue optimistic mutations with deterministic monotonic timestamps.',
+        '3. Reconcile concurrent edits using state-based CRDT delta synchronization.',
+        '4. Push background delta changes over GraphQL subscriptions upon reconnection.'
+      ];
+      result = 'Zero-latency offline interactions with automated bi-directional cloud synchronization.';
+      insight = 'Optimistic local persistence paired with vector clock versioning turns flaky network conditions from an error into an invisible background detail.';
+      flowTitle = 'Offline-First Mobile Sync Architecture';
+      flowStages = [
+        'Mobile Client (Flutter / Native)',
+        'Local SQLite Store (Drift / SQLCipher)',
+        'Conflict-Free Sync Engine (CRDT)',
+        'GraphQL API Gateway (Apollo)',
+        'Cloud Database (PostgreSQL)'
+      ];
+    } else {
+      const cleanDesc = explanation || 'interactive modern dashboard with real-time state feedback';
+      situation = `Most showcases for ${cleanDesc} only show static images where users can’t feel the real-time speed, responsiveness, or core UX polish.`;
+      actionSteps = [
+        `1. Inspect clean viewport and initial layout for ${cleanDesc}.`,
+        '2. Glide cursor and trigger primary action showing instantaneous visual feedback.',
+        '3. Demonstrate core differentiating capability and real-time state recalculation.',
+        '4. Switch viewports or open secondary modal to showcase responsive ergonomics.'
+      ];
+      result = 'Fluid 1080p native walkthrough under 18 seconds capturing real-time responsiveness with zero frame drops.';
+      insight = 'Keeping core computations client-side via native Web APIs eliminates unnecessary roundtrips and protects user data.';
+      flowTitle = `${cleanDesc.split(' ').slice(0, 4).join(' ')} System Architecture`;
+      flowStages = [
+        'Frontend Client (React / Next.js)',
+        'Edge Routing & WAF (Vercel / Cloudflare)',
+        'Core Execution Logic (API Worker)',
+        'Session Vault & State (WebCrypto / Redis)',
+        'Persistent Database (PostgreSQL)'
+      ];
+    }
+
+    // Populate SARI textareas
+    if (sariSituation) sariSituation.value = situation;
+    if (sariAction) sariAction.value = actionSteps.join('\n');
+    if (sariResult) sariResult.value = result;
+    if (sariInsight) sariInsight.value = insight;
+    assembleSariScript();
+
+    // Populate Flowchart fields
+    if (flowchartTitleInput && !flowchartTitleInput.value.trim()) {
+      flowchartTitleInput.value = flowTitle;
+    }
+    const nodeInputs = document.querySelectorAll('.node-input');
+    if (nodeInputs.length > 0 && flowStages.length > 0) {
+      nodeInputs.forEach((inp, idx) => {
+        if (flowStages[idx]) inp.value = flowStages[idx];
+      });
+    }
+
+    // Update Active Showcase Summary Card
+    if (activeScenarioTitle) activeScenarioTitle.textContent = explanation ? (explanation.length > 50 ? explanation.substring(0, 47) + '...' : explanation) : 'Custom Dashboard Showcase';
+    if (activeScenarioDesc) activeScenarioDesc.textContent = `Showcases ${actionSteps.length} differentiating scenes with authentic builder storytelling.`;
+    if (activeScenarioBadge) activeScenarioBadge.textContent = `${activeArchetype.toUpperCase()} · ${ratioSelect ? ratioSelect.value : '1:1'}`;
+    if (activeScenarioTargetBadge) activeScenarioTargetBadge.textContent = url;
+
+    // Generate narrative caption using TEMPLATES.md archetypes
+    generateSmartCaption();
+
+    // Re-fetch timeline
+    fetchPlan();
+
+    showToast('✓ Synthesized unique scenes & story from TEMPLATES.md!');
+  }
+
+  if (synthesizeShowcaseBtn) {
+    synthesizeShowcaseBtn.addEventListener('click', synthesizeShowcaseFromTemplate);
+  }
+
+  // Archetype Chips Selection (from TEMPLATES.md)
+  archetypeChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      archetypeChips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activeArchetype = chip.dataset.archetype || 'shipping';
+      if (activeScenarioBadge) {
+        activeScenarioBadge.textContent = `${activeArchetype.toUpperCase()} · ${ratioSelect ? ratioSelect.value : '1:1'}`;
+      }
+      generateSmartCaption();
+      showToast(`Switched story archetype to: ${chip.textContent.trim()}`);
+    });
+  });
+
+  // Collapsible Customization Accordion
+  if (toggleCustomizeBtn && scenarioDetailsContainer && customizeChevron && customizeToggleText) {
+    toggleCustomizeBtn.addEventListener('click', () => {
+      const isCollapsed = scenarioDetailsContainer.classList.contains('collapsed');
+      scenarioDetailsContainer.classList.toggle('collapsed', !isCollapsed);
+      customizeChevron.classList.toggle('open', isCollapsed);
+      customizeToggleText.textContent = isCollapsed ? 'Hide Details & Prompts ▴' : 'Fine-Tune Story & Scene Steps ▾';
+    });
+  }
+
+  // URL Preset Quick Links
   if (presetExample1) {
     presetExample1.addEventListener('click', () => {
       presetExample1.classList.add('active');
       if (presetExample2) presetExample2.classList.remove('active');
+      if (presetClear) presetClear.classList.remove('active');
       targetUrlInput.value = 'https://intelligent-curie-alpha.vercel.app/';
-      if (sariSituation) sariSituation.value = 'Most LinkedIn developer posts show GitHub links or screenshots. There is zero visual proof of the actual live UX — no cursor motion, no interactions, no authentic feel.';
-      if (sariAction) sariAction.value = '1. Inspect desktop split-panel with real-time entropy meter (~105 bits).\n2. One-tap password regeneration — cursor glide + click ripple.\n3. Toggle passphrase mode showing correct-horse-battery-staple words.\n4. Open air-gapped QR code SVG modal for instant device transfer.\n5. Switch to mobile viewport highlighting sticky thumb-reach action bar.';
-      if (sariResult) sariResult.value = 'Crystal-clear 1080p GIF + HD WebM under 17 seconds. Shows every interaction authentically with zero blur — click ripples, modal transitions, mobile sticky bar.';
-      if (sariInsight) sariInsight.value = 'Key insight: cryptographic entropy runs entirely client-side (WebCrypto API) — zero server round-trips, zero data leaves the browser. Air-gapped by design.';
-      captionPromptInput.value = 'Emphasize the cryptographic security, real-time client-side entropy calculation (~105 bits), responsive mobile thumb reach bar, and instant air-gapped QR modal.';
-      assembleSariScript();
-      fetchPlan();
-      generateSmartCaption();
+      if (appExplanationInput) {
+        appExplanationInput.value = 'Real-time cryptographic password generator with client-side entropy calculation (~105 bits), passphrase mode, and air-gapped QR modal';
+      }
+      synthesizeShowcaseFromTemplate();
     });
   }
 
@@ -200,15 +389,38 @@ document.addEventListener('DOMContentLoaded', () => {
     presetExample2.addEventListener('click', () => {
       presetExample2.classList.add('active');
       if (presetExample1) presetExample1.classList.remove('active');
+      if (presetClear) presetClear.classList.remove('active');
       targetUrlInput.value = 'http://localhost:3000/demo';
-      if (sariSituation) sariSituation.value = 'Developers need a fast, local way to test automated visual walkthrough recording without external internet latency.';
-      if (sariAction) sariAction.value = '1. Inspect desktop UI with real-time entropy calculation.\n2. Click Quick One-Tap Generate button with cursor glide.\n3. Open QR code transfer modal.\n4. Switch to mobile viewport.';
-      if (sariResult) sariResult.value = 'Instant local Playwright recording completed in seconds, generating crystal-clear 1080p output.';
-      if (sariInsight) sariInsight.value = 'Built-in local demo server eliminates external network dependencies while allowing live Playwright recording.';
-      captionPromptInput.value = 'Local Playwright recording test and validation.';
-      assembleSariScript();
-      fetchPlan();
-      generateSmartCaption();
+      if (appExplanationInput) {
+        appExplanationInput.value = 'Local interactive visual proof demo server with zero-latency entropy feedback and instant Playwright recording';
+      }
+      synthesizeShowcaseFromTemplate();
+    });
+  }
+
+  if (presetClear) {
+    presetClear.addEventListener('click', () => {
+      presetClear.classList.add('active');
+      if (presetExample1) presetExample1.classList.remove('active');
+      if (presetExample2) presetExample2.classList.remove('active');
+      targetUrlInput.value = '';
+      if (appExplanationInput) appExplanationInput.value = '';
+      if (sariSituation) sariSituation.value = '';
+      if (sariAction) sariAction.value = '';
+      if (sariResult) sariResult.value = '';
+      if (sariInsight) sariInsight.value = '';
+      if (instructionsInput) instructionsInput.value = '';
+      if (captionPromptInput) captionPromptInput.value = '';
+      if (flowchartTitleInput) flowchartTitleInput.value = '';
+      document.querySelectorAll('.node-input').forEach(i => i.value = '');
+      if (activeScenarioBadge) activeScenarioBadge.textContent = 'Custom Project Showcase';
+      if (activeScenarioTargetBadge) activeScenarioTargetBadge.textContent = 'Awaiting URL...';
+      if (activeScenarioTitle) activeScenarioTitle.textContent = 'Ready for Your Dashboard';
+      if (activeScenarioDesc) activeScenarioDesc.textContent = 'Enter your URL and explanation above, then click Synthesize to construct unique scenes and an organic builder story.';
+      if (captionEditor) captionEditor.value = '';
+      if (liPreviewText) liPreviewText.innerHTML = '<span style="color:#64748b; font-style:italic;">Enter your project URL and click Synthesize to preview your authentic LinkedIn post...</span>';
+      if (stepTimeline) stepTimeline.innerHTML = '<div style="color:#64748b; font-size:0.8rem; padding:0.5rem 0;">Awaiting synthesis or manual steps...</div>';
+      showToast('Studio cleared to blank slate.');
     });
   }
 
@@ -256,14 +468,19 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/>/g, '&gt;');
   }
 
-  // 8. Natural Builder Journey Caption Generator (Organic SARI Storytelling)
+  // 8. Natural Builder Journey Caption Generator (Driven by TEMPLATES.md Archetypes)
   function generateSmartCaption() {
     const url = targetUrlInput.value.trim() || 'https://my-app.vercel.app';
-    const situation = (sariSituation ? sariSituation.value.trim() : '') || 'Most developer showcases lack tangible proof—people see a static screenshot and have to imagine what the UX feels like.';
+    const situation = (sariSituation ? sariSituation.value.trim() : '') || 'Static screenshots weren’t cutting it — people see a GitHub link, but can’t feel the real-time latency or UX.';
     const action = (sariAction ? sariAction.value.trim() : '') || 'Engineered an authentic visual walkthrough with automated cursor tracking and real-time state feedback.';
-    const result = (sariResult ? sariResult.value.trim() : '') || 'Crystal-clear 1080p recording under 17 seconds with zero blur and 60fps fluidity.';
+    const result = (sariResult ? sariResult.value.trim() : '') || 'Crystal-clear 1080p recording under 18 seconds with zero blur and fluid 60fps pacing.';
     const insight = (sariInsight ? sariInsight.value.trim() : '') || 'Keeping heavy computations client-side via native Web APIs eliminates server roundtrips and protects user privacy by default.';
-    const notes = captionPromptInput.value.trim();
+
+    const actionBullets = action.split('\n')
+      .map(line => line.trim())
+      .filter(Boolean)
+      .map(line => line.startsWith('•') || line.match(/^[0-9]+\./) ? line.replace(/^[0-9]+\.\s*/, '• ') : `• ${line}`)
+      .join('\n');
 
     const activeTags = Array.from(document.querySelectorAll('.tag-pill.active'))
       .map(p => p.dataset.tag)
@@ -271,82 +488,130 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let postText = '';
 
-    if (activeTonePreset === 'launch') {
-      postText = `I spent the week building something I genuinely needed: ${url}
+    // Archetype 1: The "Late-Night Shipping Log" (Raw Builder Journey)
+    if (activeArchetype === 'shipping') {
+      postText = `I spent 3 nights rewriting this one flow because static screenshots weren't cutting it.
 
-${situation}
+Whenever I shared our progress, people would say: "Looks nice, what does it actually do?"
+Links to GitHub got bookmarked and forgotten. Screenshots didn't show the real-time latency or the interaction feel.
 
-Whenever I shared progress, static screenshots never told the full story. So here is the actual walkthrough in action:
+So I sat down and built this:
 
-${notes ? '✨ What is happening in this clip:\n' + notes.split('\n').map(n => '• ' + n.trim().replace(/^[0-9]+\.\s*/, '')).filter(Boolean).join('\n') + '\n\n' : ''}The real outcome: ${result}
+[Attach Walkthrough GIF/Video]
 
-💡 The biggest engineering takeaway:
+Here is what is happening under the hood:
+${actionBullets}
+
+The biggest surprise during testing:
 ${insight}
+
+The real result: ${result}
 
 Live build is up here if you want to test it: ${url}
-What is one UI or architecture detail you find yourself obsessively polishing?
 
-${activeTags}`;
-    } else if (activeTonePreset === 'architecture') {
-      postText = `Behind every smooth 60fps UI is an intentional, low-latency pipeline.
+What’s one UI interaction you find yourself obsessively polishing?
 
-Here is the exact request lifecycle & architecture powering ${url}:
+${activeTags || '#BuildInPublic #IndieHacker #WebDev #NextJS #Frontend'}`;
 
-[Start Client] ➔ [Edge CDN & WAF] ➔ [API Gateway] ➔ [Storage & Vault] ➔ [200 OK]
+    // Archetype 2: The "Why We Chose X Over Y" (Engineering Decision Journal)
+    } else if (activeArchetype === 'decisions') {
+      postText = `We almost went with a standard monolithic setup for this project.
+Then we ran the numbers on cold starts, latency, and cross-region execution.
+
+Here is the actual pipeline we ended up building instead:
+
+[Attach Flowchart / Walkthrough GIF]
 
 ${situation}
 
-Why we engineered it this way:
-${action ? action.split('\n').filter(Boolean).map(a => '• ' + a.trim().replace(/^[0-9]+\.\s*/, '')).slice(0, 4).join('\n') : '• Edge Routing: WAF inspection & rate limiting before hitting backend logic\n• Decoupled Vault: Air-gapped verification\n• Fast Cache: Sub-2ms distributed state synchronization'}
+The decision came down to these architectural bets:
+${actionBullets}
 
-The result: ${result}
-
-💡 Key Architectural Insight:
+The takeaway:
 ${insight}
 
-Engineers: how do you balance edge computation vs centralized database transactions in your current stack?
+The measurable outcome: ${result}
 
-Explore the live build: ${url}
+Full system is live: ${url}
 
-${activeTags}`;
-    } else if (activeTonePreset === 'buildinpublic') {
-      postText = `Another milestone shipped in public: ${url}
+Engineers: What's your rule of thumb for deciding what lives client-side/edge vs. in the primary database?
 
-Building this came directly from a real friction:
+${activeTags || '#SoftwareArchitecture #SystemDesign #EdgeComputing #BackendEngineering #DevOps'}`;
+
+    // Archetype 3: The "Micro-Interaction Spotlight" (Obsessive Craft & UX)
+    } else if (activeArchetype === 'craft') {
+      postText = `Most users won’t notice this detail. But they’ll feel it.
+
+[Attach Walkthrough Clip]
+
+When building this interface, we kept running into the same frustration with standard web tools:
 ${situation}
 
-Here is what went into this iteration:
-${action ? action.split('\n').filter(Boolean).map(a => '• ' + a.trim().replace(/^[0-9]+\.\s*/, '')).slice(0, 3).join('\n') : '• Clean client-side state engine\n• Sticky mobile thumb-reach ergonomics\n• Air-gapped offline transfer'}
+So we rethought the interaction ergonomics:
+${actionBullets}
 
-The numbers so far: ${result}
-
-🔑 Lesson learned the hard way:
-${insight}
-
-Shipping in public forces extreme clarity on product priorities. Try the build and break it: ${url}
-
-${activeTags}`;
-    } else if (activeTonePreset === 'feature') {
-      postText = `Most users won’t consciously notice this detail in ${url}. But they will feel it.
-
-${situation}
-
-So we re-engineered the entire interaction flow:
-${action ? action.split('\n').filter(Boolean).map(a => '• ' + a.trim().replace(/^[0-9]+\.\s*/, '')).slice(0, 3).join('\n') : '• Zero-latency client execution\n• Real-time responsive visual feedback\n• Clean ergonomics'}
+Good software isn't just about clean code—it's about respecting the physical ergonomics of how people actually hold and interact with devices.
 
 The difference: ${result}
 
-🎯 The Core Insight:
+💡 Core Insight:
 ${insight}
 
-Good software isn't just about clean code—it's about respecting the physical ergonomics of how people actually use the tool.
+Try clicking through it live: ${url}
 
-Try it out live: ${url}
+${activeTags || '#ProductDesign #UIUX #FrontendDev #WebDevelopment #DesignEngineering'}`;
 
-${activeTags}`;
+    // Archetype 4: The "Unfiltered Post-Mortem / What Broke" (Honest Debugging Log)
+    } else if (activeArchetype === 'postmortem') {
+      postText = `This looked completely fine in local development.
+Then we tested it on throttled connections and high-DPI viewports.
+
+The issues became obvious immediately:
+${situation}
+
+Here is how we engineered around it:
+${actionBullets}
+
+The result: ${result}
+
+💡 Hard-earned technical takeaway:
+${insight}
+
+See the live difference here: ${url}
+
+What was the last bug that humbled you in production?
+
+${activeTags || '#SoftwareEngineering #WebPerformance #Debugging #Frontend #FullStack'}`;
+
+    // Archetype 5: The "Contrarian Take Backed by Visual Proof"
+    } else if (activeArchetype === 'contrarian') {
+      postText = `Unpopular opinion: You probably don't need heavy server roundtrips or complex databases for workflows that can run 100% in the user's browser.
+
+Here is visual proof of what is possible with native browser APIs:
+
+[Attach Walkthrough GIF/Video]
+
+The friction with the standard way:
+${situation}
+
+What we built instead:
+${actionBullets}
+
+The outcome: ${result}
+
+💡 The Architecture Gem:
+${insight}
+
+Test the live build and break it: ${url}
+
+Where do you draw the line between client-side computation and server orchestration?
+
+${activeTags || '#WebDevelopment #JavaScript #SoftwareArchitecture #IndieHacker #FullStack'}`;
     }
 
-    captionEditor.value = postText.trim();
+    if (captionEditor) {
+      captionEditor.value = postText.trim();
+    }
     syncCaptionToPreview();
   }
 

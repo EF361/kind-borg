@@ -1571,3 +1571,170 @@ body {
   opacity: 0.75;
   font-size: 0.76rem;
 }
+
+/* ==========================================================================
+   Project Input & TEMPLATES.md Synthesizer Studio Styles
+   ========================================================================== */
+.project-input-container {
+  background: rgba(17, 24, 39, 0.7);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.1rem;
+  margin-bottom: 1rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.field-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+}
+
+.field-label-row .field-label {
+  margin-bottom: 0;
+}
+
+.archetype-selector-block {
+  margin-top: 0.85rem;
+}
+
+.archetype-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.35rem;
+}
+
+.archetype-chip {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.archetype-chip:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(56, 189, 248, 0.4);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.archetype-chip.active {
+  background: rgba(6, 182, 212, 0.16);
+  border-color: var(--accent-cyan);
+  color: #38bdf8;
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.25);
+}
+
+/* Active Showcase Summary Card */
+.active-scenario-card {
+  background: linear-gradient(135deg, rgba(17, 24, 39, 0.85) 0%, rgba(22, 32, 50, 0.95) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+.active-scenario-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.scenario-tag-badge {
+  background: rgba(59, 130, 246, 0.18);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.scenario-target-badge {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-muted);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.active-scenario-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.2rem;
+}
+
+.active-scenario-desc {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+.btn-customize-toggle {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: #e2e8f0;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 8px 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-customize-toggle:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+.chevron-indicator {
+  font-size: 0.8rem;
+  transition: transform 0.25s ease;
+  display: inline-block;
+}
+
+.chevron-indicator.open {
+  transform: rotate(180deg);
+}
+
+/* Collapsible Details Container */
+.scenario-details-container {
+  transition: opacity 0.25s ease;
+}
+
+.scenario-details-container.collapsed {
+  display: none;
+}
+
