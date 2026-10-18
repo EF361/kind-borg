@@ -385,14 +385,40 @@
             </button>
           </div>
 
-          <!-- Post Angle Presets -->
+          <!-- n8n AI Agent Integration Banner -->
+          <div class="n8n-agent-banner">
+            <div class="n8n-agent-info">
+              <span class="n8n-status-dot" id="n8n-status-dot"></span>
+              <span><strong>n8n AI Agent:</strong> LinkedIn Caption Architect (<span id="n8n-status-text">Active · gpt-4o</span>)</span>
+            </div>
+            <div class="n8n-agent-links">
+              <a href="https://a1wnjhu0.rcsrv.net/projects/zSFT1uOR5tzUS4J5/agents/XSUKTYcVK5xSe7g3" target="_blank" rel="noopener noreferrer" class="n8n-link" title="Open first-class n8n Agent Chat in a new tab">
+                Open Agent Chat ↗
+              </a>
+            </div>
+          </div>
+
+          <!-- n8n Webhook Configuration -->
+          <div class="input-block n8n-config-block">
+            <div class="label-with-hint">
+              <label class="field-label" for="n8n-webhook-url-input">n8n Webhook Endpoint</label>
+              <span class="field-hint">Auto-synced with n8n instance</span>
+            </div>
+            <div class="n8n-webhook-input-group">
+              <input type="text" id="n8n-webhook-url-input" class="n8n-webhook-input" value="https://a1wnjhu0.rcsrv.net/webhook/generate-linkedin-caption" placeholder="https://your-n8n-instance/webhook/generate-linkedin-caption">
+              <button type="button" id="n8n-test-btn" class="btn-sm btn-ghost" title="Test Webhook Connection">Test</button>
+            </div>
+          </div>
+
+          <!-- Post Angle & Builder Archetype Presets (from TEMPLATES.md) -->
           <div class="caption-presets-section">
-            <label class="field-label">Post Angle & Tone Preset</label>
+            <label class="field-label">Builder Story Archetype (TEMPLATES.md)</label>
             <div class="tone-preset-chips" id="tone-preset-chips">
-              <button type="button" class="tone-chip active" data-preset="launch">🚀 Product Launch</button>
-              <button type="button" class="tone-chip" data-preset="architecture">🏗️ Tech Deep Dive</button>
-              <button type="button" class="tone-chip" data-preset="buildinpublic">📈 Build In Public</button>
-              <button type="button" class="tone-chip" data-preset="feature">💡 Feature Demo</button>
+              <button type="button" class="tone-chip active" data-archetype="shipping">🚀 Shipping Log</button>
+              <button type="button" class="tone-chip" data-archetype="decisions">🏗️ Why X Over Y</button>
+              <button type="button" class="tone-chip" data-archetype="craft">💡 Micro-Craft</button>
+              <button type="button" class="tone-chip" data-archetype="postmortem">🛠️ Post-Mortem</button>
+              <button type="button" class="tone-chip" data-archetype="contrarian">⚡ Contrarian</button>
             </div>
           </div>
 
@@ -410,7 +436,7 @@
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
               </svg>
-              <span>Generate Caption from Link</span>
+              <span id="generate-caption-text">Generate Caption with n8n AI Agent</span>
             </button>
             <button type="button" id="copy-caption-btn" class="btn-sm btn-ghost">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -631,6 +657,12 @@
               <span class="field-hint">Placeholders: {url}, {topic}, {notes}</span>
             </div>
             <textarea id="prompt-template-editor" rows="6" class="textarea-code"></textarea>
+          </div>
+
+          <div class="input-block">
+            <label class="field-label" for="modal-n8n-webhook-url">n8n AI Agent Webhook Endpoint</label>
+            <input type="text" id="modal-n8n-webhook-url" placeholder="https://a1wnjhu0.rcsrv.net/webhook/generate-linkedin-caption" class="text-input">
+            <span class="field-subtext">Direct endpoint to the n8n "LinkedIn Caption Generator Webhook" powered by OpenAI gpt-4o.</span>
           </div>
 
           <div class="input-block">

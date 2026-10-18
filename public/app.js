@@ -47,10 +47,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const toneChips = document.querySelectorAll('.tone-chip');
   const captionPromptInput = document.getElementById('caption-prompt-input');
   const generateCaptionBtn = document.getElementById('generate-caption-btn');
+  const generateCaptionText = document.getElementById('generate-caption-text');
   const copyCaptionBtn = document.getElementById('copy-caption-btn');
   const captionEditor = document.getElementById('caption-editor');
   const captionCharCount = document.getElementById('caption-char-count');
   const hashtagPills = document.querySelectorAll('.tag-pill');
+
+  // n8n AI Agent Integration Elements
+  const n8nStatusDot = document.getElementById('n8n-status-dot');
+  const n8nStatusText = document.getElementById('n8n-status-text');
+  const n8nWebhookUrlInput = document.getElementById('n8n-webhook-url-input');
+  const n8nTestBtn = document.getElementById('n8n-test-btn');
+  const modalN8nWebhookUrl = document.getElementById('modal-n8n-webhook-url');
 
   // Prompt Manager Modal Elements
   const openPromptManagerBtn = document.getElementById('open-prompt-manager-btn');
@@ -61,6 +69,65 @@ document.addEventListener('DOMContentLoaded', () => {
   const geminiApiKeyInput = document.getElementById('gemini-api-key-input');
   const savePromptsBtn = document.getElementById('save-prompts-btn');
   const resetPromptsBtn = document.getElementById('reset-prompts-btn');
+
+  // n8n Webhook Configuration & LocalStorage Persistence
+  const DEFAULT_N8N_WEBHOOK = 'https://a1wnjhu0.rcsrv.net/webhook/generate-linkedin-caption';
+  let n8nWebhookUrl = DEFAULT_N8N_WEBHOOK;
+  try {
+    const savedWebhook = localStorage.getItem('vp_n8n_webhook_url');
+    if (savedWebhook) n8nWebhookUrl = savedWebhook;
+  } catch (_) {}
+
+  if (n8nWebhookUrlInput) {
+    n8nWebhookUrlInput.value = n8nWebhookUrl;
+    n8nWebhookUrlInput.addEventListener('input', () => {
+      n8nWebhookUrl = n8nWebhookUrlInput.value.trim();
+      try { localStorage.setItem('vp_n8n_webhook_url', n8nWebhookUrl); } catch (_) {}
+      if (modalN8nWebhookUrl) modalN8nWebhookUrl.value = n8nWebhookUrl;
+    });
+  }
+
+  if (modalN8nWebhookUrl) {
+    modalN8nWebhookUrl.value = n8nWebhookUrl;
+    modalN8nWebhookUrl.addEventListener('input', () => {
+      n8nWebhookUrl = modalN8nWebhookUrl.value.trim();
+      try { localStorage.setItem('vp_n8n_webhook_url', n8nWebhookUrl); } catch (_) {}
+      if (n8nWebhookUrlInput) n8nWebhookUrlInput.value = n8nWebhookUrl;
+    });
+  }
+
+  if (n8nTestBtn) {
+    n8nTestBtn.addEventListener('click', async () => {
+      if (!n8nWebhookUrl) {
+        showToast('Please enter an n8n Webhook URL first.');
+        return;
+      }
+      if (n8nStatusDot) n8nStatusDot.className = 'n8n-status-dot testing';
+      if (n8nStatusText) n8nStatusText.textContent = 'Testing connection...';
+      try {
+        const res = await fetch(n8nWebhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            archetype: 'shipping-log',
+            description: 'Ping test from VisualProof Studio',
+            url: targetUrlInput ? targetUrlInput.value.trim() : ''
+          })
+        });
+        if (res.ok) {
+          if (n8nStatusDot) n8nStatusDot.className = 'n8n-status-dot';
+          if (n8nStatusText) n8nStatusText.textContent = 'Active · gpt-4o';
+          showToast('n8n Webhook connected successfully!');
+        } else {
+          throw new Error(`HTTP ${res.status}`);
+        }
+      } catch (err) {
+        if (n8nStatusDot) n8nStatusDot.className = 'n8n-status-dot offline';
+        if (n8nStatusText) n8nStatusText.textContent = 'Offline (using fallback)';
+        showToast(`n8n Webhook ping failed: ${err.message}`);
+      }
+    });
+  }
 
   // LinkedIn Post Preview & Output Elements
   const liPreviewText = document.getElementById('li-preview-text');
@@ -347,16 +414,27 @@ document.addEventListener('DOMContentLoaded', () => {
     synthesizeShowcaseBtn.addEventListener('click', synthesizeShowcaseFromTemplate);
   }
 
-  // Archetype Chips Selection (from TEMPLATES.md)
+  // Helper to sync archetype selections across Step 1 and Step 2
+  function setStoryArchetype(archetype, skipGeneration = false) {
+    activeArchetype = archetype || 'shipping';
+    archetypeChips.forEach(c => {
+      c.classList.toggle('active', c.dataset.archetype === activeArchetype);
+    });
+    toneChips.forEach(c => {
+      c.classList.toggle('active', c.dataset.archetype === activeArchetype);
+    });
+    if (activeScenarioBadge) {
+      activeScenarioBadge.textContent = `${activeArchetype.toUpperCase()} · ${ratioSelect ? ratioSelect.value : '1:1'}`;
+    }
+    if (!skipGeneration) {
+      generateSmartCaption();
+    }
+  }
+
+  // Archetype Chips Selection (Step 1)
   archetypeChips.forEach(chip => {
     chip.addEventListener('click', () => {
-      archetypeChips.forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-      activeArchetype = chip.dataset.archetype || 'shipping';
-      if (activeScenarioBadge) {
-        activeScenarioBadge.textContent = `${activeArchetype.toUpperCase()} · ${ratioSelect ? ratioSelect.value : '1:1'}`;
-      }
-      generateSmartCaption();
+      setStoryArchetype(chip.dataset.archetype);
       showToast(`Switched story archetype to: ${chip.textContent.trim()}`);
     });
   });
@@ -424,17 +502,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 7. Tone Presets & AI Caption Generator
+  // 7. Builder Story Archetypes (Step 2)
   toneChips.forEach(chip => {
     chip.addEventListener('click', () => {
-      toneChips.forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-      activeTonePreset = chip.dataset.preset;
-      generateSmartCaption();
+      setStoryArchetype(chip.dataset.archetype);
+      showToast(`Switched story archetype to: ${chip.textContent.trim()}`);
     });
   });
 
-  generateCaptionBtn.addEventListener('click', generateSmartCaption);
+  generateCaptionBtn.addEventListener('click', () => generateSmartCaption());
 
   // Hashtag Pills Toggle
   hashtagPills.forEach(pill => {
@@ -468,14 +544,104 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/>/g, '&gt;');
   }
 
-  // 8. Natural Builder Journey Caption Generator (Driven by TEMPLATES.md Archetypes)
-  function generateSmartCaption() {
-    const url = targetUrlInput.value.trim() || 'https://my-app.vercel.app';
+  // Helper to remove any markdown code block fences if returned by the LLM
+  function cleanMarkdownOutput(rawText) {
+    if (!rawText) return '';
+    let text = rawText.trim();
+    if (text.startsWith('```markdown')) {
+      text = text.slice(11);
+    } else if (text.startsWith('```')) {
+      text = text.slice(3);
+    }
+    if (text.endsWith('```')) {
+      text = text.slice(0, -3);
+    }
+    return text.trim();
+  }
+
+  // Map internal archetype key to n8n AI Agent archetype names
+  function mapArchetypeToAgentName(arch) {
+    switch (arch) {
+      case 'shipping': return 'shipping-log';
+      case 'decisions': return 'why-x-over-y';
+      case 'craft': return 'micro-interaction';
+      case 'postmortem': return 'post-mortem';
+      case 'contrarian': return 'contrarian';
+      default: return 'shipping-log';
+    }
+  }
+
+  // 8. Natural Builder Journey Caption Generator (n8n AI Agent with Local Fallback)
+  async function generateSmartCaption() {
+    const url = targetUrlInput ? targetUrlInput.value.trim() || 'https://my-app.vercel.app' : 'https://my-app.vercel.app';
+    const explanation = appExplanationInput ? appExplanationInput.value.trim() : '';
+    const customPrompt = captionPromptInput ? captionPromptInput.value.trim() : '';
     const situation = (sariSituation ? sariSituation.value.trim() : '') || 'Static screenshots weren’t cutting it — people see a GitHub link, but can’t feel the real-time latency or UX.';
     const action = (sariAction ? sariAction.value.trim() : '') || 'Engineered an authentic visual walkthrough with automated cursor tracking and real-time state feedback.';
     const result = (sariResult ? sariResult.value.trim() : '') || 'Crystal-clear 1080p recording under 18 seconds with zero blur and fluid 60fps pacing.';
     const insight = (sariInsight ? sariInsight.value.trim() : '') || 'Keeping heavy computations client-side via native Web APIs eliminates server roundtrips and protects user privacy by default.';
 
+    // Attempt n8n AI Agent Webhook call if configured
+    if (n8nWebhookUrl) {
+      if (generateCaptionBtn) generateCaptionBtn.disabled = true;
+      if (generateCaptionText) generateCaptionText.textContent = 'Generating with n8n AI Agent...';
+      if (n8nStatusDot) n8nStatusDot.className = 'n8n-status-dot testing';
+
+      try {
+        const flowchartNodes = Array.from(document.querySelectorAll('.node-input'))
+          .map(inp => inp.value.trim() || inp.placeholder)
+          .filter(Boolean)
+          .join(' -> ');
+
+        const isFlowchartActive = modeFlowchartView && !modeFlowchartView.classList.contains('hidden');
+
+        const payload = {
+          url: url,
+          description: explanation || situation,
+          prompt: customPrompt,
+          archetype: mapArchetypeToAgentName(activeArchetype),
+          flowchartSummary: flowchartNodes,
+          metrics: result,
+          attachedMedia: isFlowchartActive ? '2D Architecture Flowchart GIF' : '1080p Web Walkthrough GIF'
+        };
+
+        const res = await fetch(n8nWebhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.caption) {
+            const cleaned = cleanMarkdownOutput(data.caption);
+            if (captionEditor) {
+              captionEditor.value = cleaned;
+            }
+            syncCaptionToPreview();
+            if (n8nStatusDot) n8nStatusDot.className = 'n8n-status-dot';
+            if (n8nStatusText) n8nStatusText.textContent = 'Active · gpt-4o';
+            showToast('✓ Caption generated via n8n AI Agent (OpenAI gpt-4o)!');
+            return;
+          }
+        }
+        throw new Error(`Status ${res.status}`);
+      } catch (err) {
+        console.warn('n8n Webhook call failed, falling back to local template synthesizer:', err);
+        if (n8nStatusDot) n8nStatusDot.className = 'n8n-status-dot offline';
+        if (n8nStatusText) n8nStatusText.textContent = 'Offline (using fallback)';
+        showToast('n8n Webhook unreachable. Switched to local TEMPLATES engine.');
+      } finally {
+        if (generateCaptionBtn) generateCaptionBtn.disabled = false;
+        if (generateCaptionText) generateCaptionText.textContent = 'Generate Caption with n8n AI Agent';
+      }
+    }
+
+    // Local Synthesis Fallback (TEMPLATES.md Archetypes)
+    runLocalTemplateSynthesis(url, situation, action, result, insight);
+  }
+
+  function runLocalTemplateSynthesis(url, situation, action, result, insight) {
     const actionBullets = action.split('\n')
       .map(line => line.trim())
       .filter(Boolean)
