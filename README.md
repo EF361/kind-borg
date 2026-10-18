@@ -1,122 +1,106 @@
-# Kind-Borg 📽️🤖  
-![Node.js](https://img.shields.io/badge/Node.js-18+-green?style=flat-square&logo=nodedotjs)  
-![JavaScript ES6+](https://img.shields.io/badge/JavaScript-ES6+-yellow?style=flat-square&logo=javascript)  
-![Puppeteer](https://img.shields.io/badge/Puppeteer-Automated_Headless_Browser-blue?style=flat-square&logo=googlechrome)  
-![FFmpeg](https://img.shields.io/badge/FFmpeg-Media_Processing-crimson?style=flat-square&logo=ffmpeg)  
-![Docker](https://img.shields.io/badge/Docker-Containerized-blue?style=flat-square&logo=docker)  
-![Tests](https://img.shields.io/badge/Tests-Covered-green?style=flat-square&logo=jest)  
-![CI/CD](https://img.shields.io/badge/CI/CD-GitHub_Actions-blue?style=flat-square&logo=githubactions)  
-![License](https://img.shields.io/badge/License-MIT-brightgreen?style=flat-square)  
+# kind-borg ![JavaScript](https://img.shields.io/badge/JavaScript-ES6%2B-yellow) ![Node.js](https://img.shields.io/badge/Node.js-18%2B-green) ![GitHub Actions](https://img.shields.io/badge/CI-GitHub%20Actions-blue) ![Docker](https://img.shields.io/badge/Containers-Docker-blue) ![License](https://img.shields.io/badge/License-MIT-lightgrey)
+
+## Executive Summary
+**kind-borg** automates complex browser workflows using Puppeteer and seamlessly integrates video recording and transcoding with FFmpeg. Designed for precision and reliability, the project provides an efficient toolchain for capturing, processing, and delivering browser-rendered content, with a strong focus on environmental controls, security, and reproducibility.
+
+## Key Features
+- 🔒 **SSRF Protection & Security Hardening**: Implements strict URL validation, including support for IPv6, DNS rebinding protection, and redirect validation.
+- 🖥️ **Browser Automation**: Utilizes Puppeteer with Chromium to manage headless browser sessions for dynamic content rendering.
+- 🎥 **Video Capture & Transcoding**: Reliable integration with FFmpeg for high-quality video encoding while avoiding partial/incomplete outputs via streaming pipelines with backpressure handling.
+- 📦 **Dockerized Environment**: Ensures isolation, deterministic builds, and resource constraints for Chromium and FFmpeg with non-root execution and minimal container privileges.
+- 📊 **Deterministic Testing**: Comprehensive Jest-based tests validate output codec compatibility, audio sync, frame accuracy, dimensions, and duration consistency.
+- 🚀 **Continuous Integration (CI)**: Automated workflows using GitHub Actions for linting, testing, and deployment.
+- 🛠️ **Resource Optimization**: Managed large assets and recordings via external storage or release artifacts, reducing committed repository size.
+- 🔍 **Debug-Friendly Traceability**: Logs detailed information on browser startup failures, encoding interruptions, and cleanup operations.
+- 📓 **Reproducibility**: Thorough documentation of concurrency limits, edge case handling, and platform-specific codec behaviors.
 
 ---
 
-## 🚀 Executive Summary
+## Architecture & Workflow
 
-**Kind-Borg** is a modular browser-based screen capture and media encoding pipeline that automates high-fidelity recordings with FFmpeg processing, all while maintaining exceptional cross-platform compatibility and robust privacy guarantees. It abstracts the complexity of capturing browser interactions and encoding into multiple media formats through its clean architecture, containerization, extensive tests, and seamless CI/CD integration.
+The following flowchart illustrates the high-level design and operational workflow of **kind-borg**, from input URL validation to video encoding and test verification:
 
----
-
-## ✨ Key Features  
-- **Headless Browser Automation**: Leverages Puppeteer to capture browser interactions with precision.  
-- **Media Encoding Pipeline**: Integrates with FFmpeg for high-performance media processing and output in multiple formats (MP4, WebM, etc.).  
-- **Zero-footprint Cleanup**: Ensures proper handling and cleanup of temporary files or interrupted processes.  
-- **Error-resilient Operations**: Tests for edge cases like codec unavailability, interrupted encoding, or browser initialization failures.  
-- **Secure URL Validation**: Restricts dangerous protocols while safeguarding against accidental internal network exposure.  
-- **Platform-agnostic Deployment**: Containerized via Docker for consistent performance across environments.  
-- **Pulled Assets**: Large artifacts like Chromium binaries and media samples are managed as external assets or releases.  
-- **Strict Dependency Pinning**: Guarantees compatibility with pinned Node.js (18+ LTS) and FFmpeg versions.  
-- **Seamless CI/CD Workflows**: GitHub Actions handle build, test, and deployment automation.  
-
----
-
-## 🛠️ Architecture & Workflow  
 ```mermaid
-graph TD
-    A["User Command"] --> B["Capture URL Validation"]
-    B --> C["Launch Puppeteer Browser"]
-    C -->|Screen Recording| D["Stream Captured Data to FFmpeg"]
-    D -->|Encode Media| E["Process Output Format(s)"]
-    E -->|Post-processing| F["Final Output"]
-    E -->|Error Handling| G["Cleanup Temporary Files"]
-    G -->|Logging & Shutdown| H["End Pipeline"]
+flowchart TD
+    A["User Input (Target URL)"] -->|"Validate URL (SSRF, DNS, IPv6 Rules)"| B["Puppeteer Session"]
+    B -->|"Launch Headless Chromium"| C["Browser Rendering"]
+    C -->|"Capture Frames & Audio"| D["Temporary File Storage (Secure, Non-Root FS)"]
+    D -->|"Process Media Files"| E["FFmpeg Encoding Pipeline"]
+    E -->|"Stream Outputs with Backpressure"| F["Final Transcoded File"]
+    F -->|"Save to External Storage"| G["Published Output"]
+    G -->|"Trigger Post-Processing Tests via CI"| H["Test Verification (Jest)"]
+    H -->|"Feedback (Metrics, Debug Logs)"| I["Generation Complete"]
 ```
 
 ---
 
-## 🧰 Tech Stack & Tools  
-- **Programming Language**: JavaScript (ES6+)  
-- **Runtime**: Node.js (v18+ recommended)  
-- **Browser Automation**: Puppeteer (Headless Chromium)  
-- **Media Encoding**: FFmpeg (version pinned for stability and codec support)  
-- **Utilities**: Lodash (functional programming helpers)  
-- **Testing**: Jest (unit and integration tests with edge-case coverage)  
-- **Containerization**: Docker (cross-platform portability)  
-- **CI/CD**: GitHub Actions  
+## Tech Stack & Tools Breakdown
+- **JavaScript ES6+**: Core language for automation and video handling logic.
+- **Node.js 18+**: Runtime environment for Puppeteer and FFmpeg integrations.
+- **Puppeteer**: Enables seamless headless browser automation with Chromium.
+- **Chromium**: Used for rendering dynamic web content prior to video capture.
+- **FFmpeg**: Industry-standard media framework for video/audio transcoding and encoding.
+- **Jest**: Framework for deterministic test development ensuring quality and compatibility.
+- **Docker**: Streamlines deployment with containerized Chromium and FFmpeg environments.
+- **GitHub Actions**: Facilitates automated testing, linting, and CI/CD pipelines.
+- **Lodash**: Simplifies data manipulation and functional programming utilities.
+- **Mermaid Diagrams**: Used for visualizing workflows and system architecture.
 
 ---
 
-## ⚡ Quickstart / Installation  
+## Quickstart / Installation
 
-1. **Clone the repository**  
+Follow these steps to set up and run **kind-borg** on your local machine:
+
+### Prerequisites
+- Node.js v18+ installed
+- Docker installed and running
+- FFmpeg accessible via the system `$PATH`
+
+### Installation Steps
+1. Clone the repository:
    ```bash
    git clone https://github.com/EF361/kind-borg.git
    cd kind-borg
-   ```  
+   ```
 
-2. **Install dependencies**  
-   Make sure you have Node.js (v18+) and npm installed.  
+2. Install dependencies:
    ```bash
    npm install
-   ```  
+   ```
 
-3. **Install FFmpeg**  
-   Follow [FFmpeg installation instructions](https://ffmpeg.org/download.html) or use your package manager:  
-   ```bash
-   # Debian/Ubuntu
-   sudo apt update && sudo apt install -y ffmpeg
-
-   # macOS (with Homebrew)
-   brew install ffmpeg
-   ```  
-
-4. **Run Tests**  
-   Verify the pipeline integrity with automated tests:  
-   ```bash
-   npm test
-   ```  
-
-5. **Usage Example**  
-   Capture a URL and process video output:  
-   ```bash
-   node index.js --url https://example.com --output output.mp4
-   ```  
-
-6. **Docker Setup**  
-   Build and run using Docker for isolated environments:  
+3. Build and start the Docker container:
    ```bash
    docker build -t kind-borg .
-   docker run --rm -v "$(pwd):/app/output" kind-borg --url https://example.com --output /app/output/output.mp4
-   ```  
+   docker run --rm -it -v "$(pwd):/app" kind-borg
+   ```
+
+4. Run the application:
+   ```bash
+   npm start -- --url="https://example.com"
+   ```
+
+5. Run tests:
+   ```bash
+   npm test
+   ```
+
+### Output Location
+Transcoded files and logs will be stored in the `output/` directory by default. Customize this location in the `.env` configuration file.
+
+### Security Notes
+Ensure all URLs provided to the tool are explicitly trusted to avoid accidental SSRF risks. Refer to the **Security** section in the documentation for further guidelines.
 
 ---
 
-## 📚 Documentation  
-
-- **Supported Codecs**: MP4 (H.264), WebM (VP8/VP9), and more.  
-- **Platform Dependencies**:  
-  - Node.js: v18+ (pinned to prevent compatibility issues).  
-  - FFmpeg: Recommended version 4.4+ with support for required codecs.  
-- **Performance Metrics**: Benchmarked handling ~25 FPS 1080p captures across modern systems.  
-- **Privacy Guarantees**:  
-  - No external network calls or telemetry.  
-  - Restricted protocols to prevent misuse of private infrastructure.  
-
-For full documentation, see the [Wiki](https://github.com/EF361/kind-borg/wiki).  
+## Contributing
+Contributions are welcome! Please open an issue or submit a pull request with detailed descriptions of the changes made.
 
 ---
 
-## 🧑‍💻 About the Author  
-
-**Alicia Goh** (EF361) is a seasoned AI & Software Engineer with a strong focus on developer experience, secure architectures, and scalable platforms. Her work showcases a commitment to clean engineering, rigorous testing, and high-performance solutions.  
+## License
+**kind-borg** is licensed under the [MIT License](LICENSE). 
 
 ---
+
+**Maintainer**: Alicia Goh (EF361) | **Contact**: [github.com/EF361](https://github.com/EF361)
