@@ -32,13 +32,13 @@
 ## 🛠️ Architecture & Workflow  
 ```mermaid
 graph TD
-    A[User Command] --> B[Capture URL Validation]
-    B --> C[Launch Puppeteer Browser]
-    C -->|Screen Recording| D[Stream Captured Data to FFmpeg]
-    D -->|Encode Media| E[Process Output Format(s)]
-    E -->|Post-processing| F[Final Output]
-    E -->|Error Handling| G[Cleanup Temporary Files]
-    G -->|Logging & Shutdown| H[End Pipeline]
+    A["User Command"] --> B["Capture URL Validation"]
+    B --> C["Launch Puppeteer Browser"]
+    C -->|Screen Recording| D["Stream Captured Data to FFmpeg"]
+    D -->|Encode Media| E["Process Output Format(s)"]
+    E -->|Post-processing| F["Final Output"]
+    E -->|Error Handling| G["Cleanup Temporary Files"]
+    G -->|Logging & Shutdown| H["End Pipeline"]
 ```
 
 ---
