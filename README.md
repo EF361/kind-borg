@@ -1,162 +1,122 @@
-# VisualProof Studio ![Node.js](https://img.shields.io/badge/Node.js-16.x-green) ![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow) ![License](https://img.shields.io/badge/License-MIT-blue) ![Build](https://img.shields.io/github/actions/workflow/status/EF361/kind-borg/ci.yml?branch=main)
-
-## Executive Summary  
-**VisualProof Studio** is a lightweight, automated screen-capture toolkit designed to produce high-quality screen recordings and GIFs for demos, tutorials, bug reporting, and documentation. Its customizable capture workflow supports precise control over frame rate, resolution, and duration, making it an indispensable tool for engineers, designers, and project managers.
-
----
-
-## Key Features  
-- 🚀 **Automated Browser Automation**  
-   Utilizes headless Chromium instances (via Puppeteer) for fully automated screen recording.  
-
-- 🎥 **High-Quality Output**  
-   Supports GIF, MP4, and WebM output formats with configurable frame rates, dimensions, and durations.  
-
-- ⚡ **Encoding Pipeline**  
-   Efficient media encoding powered by FFmpeg for performance optimization and high-quality post-processing.  
-
-- 🧩 **Fully Testable**  
-   Includes Jest-powered end-to-end tests to validate dimensions, durations, playback, and file formats.  
-
-- 🔒 **Privacy-Aware Design**  
-   Temporary files are securely managed with automated cleanup processes to prevent leaks of sensitive content.  
-
-- 📦 **CI/CD Integration**  
-   Seamlessly integrated with GitHub Actions for continuous testing and deployment.  
+# Kind-Borg 📽️🤖  
+![Node.js](https://img.shields.io/badge/Node.js-18+-green?style=flat-square&logo=nodedotjs)  
+![JavaScript ES6+](https://img.shields.io/badge/JavaScript-ES6+-yellow?style=flat-square&logo=javascript)  
+![Puppeteer](https://img.shields.io/badge/Puppeteer-Automated_Headless_Browser-blue?style=flat-square&logo=googlechrome)  
+![FFmpeg](https://img.shields.io/badge/FFmpeg-Media_Processing-crimson?style=flat-square&logo=ffmpeg)  
+![Docker](https://img.shields.io/badge/Docker-Containerized-blue?style=flat-square&logo=docker)  
+![Tests](https://img.shields.io/badge/Tests-Covered-green?style=flat-square&logo=jest)  
+![CI/CD](https://img.shields.io/badge/CI/CD-GitHub_Actions-blue?style=flat-square&logo=githubactions)  
+![License](https://img.shields.io/badge/License-MIT-brightgreen?style=flat-square)  
 
 ---
 
-## Architecture & Workflow  
+## 🚀 Executive Summary
 
+**Kind-Borg** is a modular browser-based screen capture and media encoding pipeline that automates high-fidelity recordings with FFmpeg processing, all while maintaining exceptional cross-platform compatibility and robust privacy guarantees. It abstracts the complexity of capturing browser interactions and encoding into multiple media formats through its clean architecture, containerization, extensive tests, and seamless CI/CD integration.
+
+---
+
+## ✨ Key Features  
+- **Headless Browser Automation**: Leverages Puppeteer to capture browser interactions with precision.  
+- **Media Encoding Pipeline**: Integrates with FFmpeg for high-performance media processing and output in multiple formats (MP4, WebM, etc.).  
+- **Zero-footprint Cleanup**: Ensures proper handling and cleanup of temporary files or interrupted processes.  
+- **Error-resilient Operations**: Tests for edge cases like codec unavailability, interrupted encoding, or browser initialization failures.  
+- **Secure URL Validation**: Restricts dangerous protocols while safeguarding against accidental internal network exposure.  
+- **Platform-agnostic Deployment**: Containerized via Docker for consistent performance across environments.  
+- **Pulled Assets**: Large artifacts like Chromium binaries and media samples are managed as external assets or releases.  
+- **Strict Dependency Pinning**: Guarantees compatibility with pinned Node.js (18+ LTS) and FFmpeg versions.  
+- **Seamless CI/CD Workflows**: GitHub Actions handle build, test, and deployment automation.  
+
+---
+
+## 🛠️ Architecture & Workflow  
 ```mermaid
-flowchart TD
-    A[Start: Capture Configuration] --> B{Launch Automated Browser}
-    B --> C[Screen Recording Module]
-    C --> D[FFmpeg Media Encoding Pipeline]
-    D --> E{Output Generation}
-    E -->|Success| F[Recording Stored in Output Folder]
-    E -->|Failure| G[Retry or Exit]
+graph TD
+    A[User Command] --> B[Capture URL Validation]
+    B --> C[Launch Puppeteer Browser]
+    C -->|Screen Recording| D[Stream Captured Data to FFmpeg]
+    D -->|Encode Media| E[Process Output Format(s)]
+    E -->|Post-processing| F[Final Output]
+    E -->|Error Handling| G[Cleanup Temporary Files]
+    G -->|Logging & Shutdown| H[End Pipeline]
 ```
-
-- **Screen Recording Module** uses headless Chromium to render the desired viewport and captures the screen via Puppeteer.
-- **Media Encoding Pipeline** processes raw screen captures into finalized GIF, MP4, or WebM formats using FFmpeg.
-- **Output Storage** ensures temporary files are cleaned up post-processing for efficient storage and security.
 
 ---
 
-## Tech Stack & Tools Breakdown  
-
-| **Technology**      | **Purpose**                                                                 |
-|----------------------|-----------------------------------------------------------------------------|
-| **Node.js**          | Core runtime environment driving the application                           |
-| **JavaScript (ES6+)**| Primary language for application logic                                     |
-| **Lodash**           | Utility library for data manipulation and functional programming           |
-| **Puppeteer**        | Headless browser automation for recording and workflow execution           |
-| **FFmpeg**           | Media encoding pipeline for automated post-processing                     |
-| **Jest**             | Test runner ensuring robust and bug-free implementation                   |
-| **Docker**           | Containerized environments for consistent local and CI/CD operation        |
-| **GitHub Actions**   | CI/CD platform for automated testing and deployment pipeline               |
+## 🧰 Tech Stack & Tools  
+- **Programming Language**: JavaScript (ES6+)  
+- **Runtime**: Node.js (v18+ recommended)  
+- **Browser Automation**: Puppeteer (Headless Chromium)  
+- **Media Encoding**: FFmpeg (version pinned for stability and codec support)  
+- **Utilities**: Lodash (functional programming helpers)  
+- **Testing**: Jest (unit and integration tests with edge-case coverage)  
+- **Containerization**: Docker (cross-platform portability)  
+- **CI/CD**: GitHub Actions  
 
 ---
 
-## Quickstart / Installation  
+## ⚡ Quickstart / Installation  
 
-### Prerequisites  
-- **Node.js** version 16.x or higher  
-- FFmpeg installed on your system  
-- Docker (optional, for containerized workflows)  
-
-### Installation Steps  
-
-Clone the repository:  
-```bash
-git clone https://github.com/EF361/kind-borg.git
-cd kind-borg
-```
-
-Install dependencies:  
-```bash
-npm install
-```
-
-Run tests to ensure everything is set up correctly:  
-```bash
-npm test
-```
-
-### Usage  
-
-1. **Basic Screen Capture (Default Settings)**  
-   The example below captures a 15-second GIF of the specified URL:  
+1. **Clone the repository**  
    ```bash
-   node index.js --url "https://example.com" --output ./recordings/sample.gif
-   ```
-
-2. **Customizing Frame Rate and Resolution**  
-   ```bash
-   node index.js --url "https://example.com" --output ./recordings/highres.mp4 --fps 60 --width 1920 --height 1080
-   ```
-
-3. **Using Docker**  
-   Build the Docker image:  
-   ```bash
-   docker build -t visualproof-studio .
+   git clone https://github.com/EF361/kind-borg.git
+   cd kind-borg
    ```  
-   Run the container for capturing:  
+
+2. **Install dependencies**  
+   Make sure you have Node.js (v18+) and npm installed.  
    ```bash
-   docker run --rm -v $(pwd)/recordings:/app/recordings visualproof-studio \
-     --url "https://example.com" --output ./recordings/demo.gif
-   ```
-
----
-
-## System Requirements  
-
-- **Operating System:** macOS, Linux, Windows  
-- **Hardware:** At least 4GB RAM and 2 CPU cores  
-- **Disk Space:** Requires ~100MB for dependencies + any generated recordings  
-- **Permissions:** Requires access to system/virtual display and temporary storage  
-
-**Note:** VisualProof Studio respects user privacy by ensuring no sensitive screen content is stored permanently. Temporary files are automatically cleaned, but users should avoid exposing private data during recording.
-
----
-
-## Testing Guide  
-
-The repository includes a comprehensive Jest-based test suite for validating outputs. Here's how to run and understand the tests:  
-
-```bash
-npm test
-```
-
-### End-to-End Test Coverage  
-- **Duration**: Ensures recordings match the specified duration +/- 1 frame.  
-- **Resolution**: Confirms output resolutions match user-provided settings (e.g., 1920x1080).  
-- **Frame Rate**: Validates frame count corresponds with specified FPS and duration.  
-- **File Format & Playback**: Ensures outputs can be played back without encoding errors.  
-
----
-
-## Contributing  
-
-1. Fork this repository.  
-2. Create a feature branch:  
-   ```bash
-   git checkout -b feature/my-new-feature
+   npm install
    ```  
-3. Commit your changes and push:  
+
+3. **Install FFmpeg**  
+   Follow [FFmpeg installation instructions](https://ffmpeg.org/download.html) or use your package manager:  
    ```bash
-   git commit -m "Add my feature"
-   git push origin feature/my-new-feature
+   # Debian/Ubuntu
+   sudo apt update && sudo apt install -y ffmpeg
+
+   # macOS (with Homebrew)
+   brew install ffmpeg
    ```  
-4. Submit a pull request!  
+
+4. **Run Tests**  
+   Verify the pipeline integrity with automated tests:  
+   ```bash
+   npm test
+   ```  
+
+5. **Usage Example**  
+   Capture a URL and process video output:  
+   ```bash
+   node index.js --url https://example.com --output output.mp4
+   ```  
+
+6. **Docker Setup**  
+   Build and run using Docker for isolated environments:  
+   ```bash
+   docker build -t kind-borg .
+   docker run --rm -v "$(pwd):/app/output" kind-borg --url https://example.com --output /app/output/output.mp4
+   ```  
 
 ---
 
-## License  
-This repository is licensed under the **MIT License**. See [LICENSE](LICENSE) for more information.  
+## 📚 Documentation  
+
+- **Supported Codecs**: MP4 (H.264), WebM (VP8/VP9), and more.  
+- **Platform Dependencies**:  
+  - Node.js: v18+ (pinned to prevent compatibility issues).  
+  - FFmpeg: Recommended version 4.4+ with support for required codecs.  
+- **Performance Metrics**: Benchmarked handling ~25 FPS 1080p captures across modern systems.  
+- **Privacy Guarantees**:  
+  - No external network calls or telemetry.  
+  - Restricted protocols to prevent misuse of private infrastructure.  
+
+For full documentation, see the [Wiki](https://github.com/EF361/kind-borg/wiki).  
 
 ---
 
-## Acknowledgments  
-Special thanks to the open-source community and contributors who made the toolchain (Node.js, Puppeteer, FFmpeg) possible.
+## 🧑‍💻 About the Author  
+
+**Alicia Goh** (EF361) is a seasoned AI & Software Engineer with a strong focus on developer experience, secure architectures, and scalable platforms. Her work showcases a commitment to clean engineering, rigorous testing, and high-performance solutions.  
+
+---
